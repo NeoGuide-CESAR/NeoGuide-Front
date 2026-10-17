@@ -1,0 +1,44 @@
+<app-site-header [usoInterno]="true">
+  <a routerLink="/login" class="trocar"><span class="ms" aria-hidden="true">swap_horiz</span> Sou projetista</a>
+</app-site-header>
+
+<main>
+  <section class="apresentacao" aria-labelledby="titulo-area">
+    <span class="foto" aria-hidden="true">[foto: equipe técnica Neoenergia · banco de imagens]</span>
+    <div class="apresentacao__texto">
+      <p class="etiqueta">ÁREA NEOENERGIA</p>
+      <h1 id="titulo-area">Análise de projetos de entrada de serviço</h1>
+      <ul>
+        <li><span class="ms" aria-hidden="true">inbox</span> Fila de projetos enviados pelos projetistas</li>
+        <li><span class="ms" aria-hidden="true">description</span> Memorial técnico gerado conforme a norma</li>
+        <li><span class="ms" aria-hidden="true">rule</span> Aprovar ou reprovar com motivo registrado</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="acesso" aria-labelledby="titulo-acesso">
+    <div class="ng-card cartao">
+      <h2 id="titulo-acesso"><span class="icone"><span class="ms" aria-hidden="true">badge</span></span> Acesso Neoenergia</h2>
+      <p>Use sua conta corporativa para entrar.</p>
+      <button type="button" class="ng-btn ng-btn--primario corporativo" (click)="acessoCorporativo()">
+        <span class="ms" aria-hidden="true">key</span> Entrar com conta corporativa
+      </button>
+      <div class="separador"><span>ou</span></div>
+      <form [formGroup]="form" (ngSubmit)="entrar()">
+        <label class="sr-only" for="matricula">Matrícula ou e-mail corporativo</label>
+        <input id="matricula" type="text" formControlName="documento" autocomplete="username" placeholder="Matrícula ou e-mail corporativo" [attr.aria-invalid]="form.controls.documento.touched && form.controls.documento.invalid" />
+        <div class="senha">
+          <label class="sr-only" for="senha-neoenergia">Senha</label>
+          <input id="senha-neoenergia" [type]="mostrarSenha() ? 'text' : 'password'" formControlName="senha" autocomplete="current-password" placeholder="Senha" />
+          <button type="button" class="ng-icon-btn" [attr.aria-label]="mostrarSenha() ? 'Ocultar senha' : 'Mostrar senha'" [attr.aria-pressed]="mostrarSenha()" (click)="mostrarSenha.set(!mostrarSenha())"><span class="ms" aria-hidden="true">{{ mostrarSenha() ? 'visibility_off' : 'visibility' }}</span></button>
+        </div>
+        <button type="button" class="recuperar" (click)="recuperarSenha()">Esqueceu sua senha?</button>
+        <button type="submit" class="ng-btn ng-btn--primario entrar" [disabled]="form.invalid || enviando()">{{ enviando() ? 'Entrando…' : 'Entrar' }}</button>
+      </form>
+      @if (mensagem()) { <p class="mensagem" role="status">{{ mensagem() }}</p> }
+      <p class="aviso"><span class="ms" aria-hidden="true">info</span> Sem cadastro aberto: o acesso de analistas e administradores é liberado pela equipe do NeoGuide.</p>
+    </div>
+  </section>
+</main>
+
+<app-site-footer [links]="['Suporte interno', 'Políticas e Avisos de Privacidade']" />

@@ -1,0 +1,144 @@
+
+  :host{
+    --green:#00a443;
+    --green-btn:#00a443;
+    --green-dark:#007f2e;
+    --green-deep:#003f2a;
+    --text:#5b5753;
+    --border:#e0d6cc;
+    --cream:#fff8f2;
+    --peach:#fde4c1;
+    --icon-bg:#d9eadf;
+    --font:'Figtree','Google Sans','Segoe UI',Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+
+  :host{font-family:var(--font);color:var(--text);background:#fff;-webkit-font-smoothing:antialiased}
+  a{text-decoration:none;color:inherit}
+  button{font-family:inherit;cursor:pointer}
+  :focus-visible{outline:3px solid #ffb81c;outline-offset:2px}
+  svg{display:block}
+
+  /* ===== Hero ===== */
+  .hero{position:relative;min-height:625px;display:flex;align-items:center;justify-content:space-between;gap:40px;padding:60px 26px;color:#fff;overflow:hidden;
+    background:
+      linear-gradient(90deg,rgba(0,64,40,.9) 0%,rgba(0,64,40,.82) 55%,rgba(0,64,40,.55) 100%),
+      linear-gradient(135deg,#0a4a30,#3b4a30 60%,#6b5a3c);
+  }
+  .hero-text{max-width:720px}
+  .eyebrow{font-size:15px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;margin-bottom:22px}
+  .hero h1{font-size:64px;line-height:1.1;font-weight:400;letter-spacing:-.5px;margin-bottom:28px}
+  .hero p{font-size:24px;line-height:1.5;font-weight:400;max-width:640px}
+  .login-card{background:#fff;color:var(--text);border-radius:12px;padding:40px 40px 40px;width:450px;flex-shrink:0;box-shadow:0 8px 30px rgba(0,0,0,.25);margin-right:0}
+  .login-card .icon{color:var(--green-dark);margin-bottom:22px}
+  .login-card h2{font-size:28px;font-weight:400;margin-bottom:10px}
+  .login-card p{font-size:18px;line-height:1.5;margin-bottom:26px;color:var(--text);max-width:none}
+  .btn{display:block;width:100%;text-align:center;border:0;border-radius:4px;color:#fff;font-size:16px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:14px 10px;transition:filter .2s}
+  .btn:hover{filter:brightness(.92)}
+  .btn-dark{background:var(--green-dark);margin-bottom:20px}
+  .btn-light{background:var(--green-btn)}
+
+  /* ===== Como ajuda ===== */
+  .section{padding:0 26px}
+  .help{padding-top:96px;padding-bottom:70px}
+  .kicker{color:var(--green);font-size:15px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:14px}
+  .section h2.title{color:var(--green-dark);font-size:38px;font-weight:400;margin-bottom:36px}
+  .help-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:30px}
+  .help-card{border:1px solid var(--border);border-radius:14px;padding:30px;min-height:278px;background:#fff}
+  .help-card .circle{width:60px;height:60px;border-radius:50%;background:var(--icon-bg);display:flex;align-items:center;justify-content:center;color:var(--green-dark);margin-bottom:38px}
+  .help-card h3{font-size:24px;font-weight:400;margin-bottom:14px}
+  .help-card p{font-size:17px;line-height:1.55}
+
+  /* ===== Destaques ===== */
+  .highlights{padding-top:30px;padding-bottom:90px}
+  .hl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:6px}
+  .hl-card{display:flex;flex-direction:column;border-radius:28px;background:var(--cream);padding:38px;min-height:308px;border:2px solid transparent;transition:border-color .2s,box-shadow .2s}
+  .hl-card.featured{background:var(--peach)}
+  .hl-card.featured h3,.hl-card.featured p{color:#0b3d2a}
+  .hl-card:hover,.hl-card:focus-visible{border-color:var(--green-dark)}
+  .hl-card .ico{color:var(--green-dark);margin-bottom:30px}
+  .hl-card h3{font-size:25px;font-weight:600;margin-bottom:14px}
+  .hl-card p{font-size:17px;line-height:1.55;margin-bottom:auto}
+  .more{display:flex;align-items:center;gap:8px;color:var(--green-dark);font-weight:700;font-size:18px;text-transform:uppercase;letter-spacing:.3px;margin-top:28px}
+  .featured .more{color:#0b3d2a}
+
+  /* ===== Acesso corporativo ===== */
+  .corp{background:var(--green-deep);color:#fff;padding:68px 26px 70px;display:flex;align-items:center;justify-content:space-between;gap:30px;flex-wrap:wrap}
+  .corp .eyebrow{margin-bottom:16px}
+  .corp h2{font-size:38px;font-weight:400;margin-bottom:14px}
+  .corp p{font-size:19px;color:#d4e3da}
+  .btn-analyst{display:flex;align-items:center;gap:10px;background:#fff;color:var(--green-dark);border:0;border-radius:4px;padding:17px 30px;font-size:17px;font-weight:600;text-transform:uppercase;transition:background .2s}
+  .btn-analyst:hover{background:#e8f3ec}
+
+  /* ===== Footer ===== */
+  .footer{background:#007f2e;display:flex;gap:50px;padding:0 26px;height:56px;align-items:center;flex-wrap:wrap}
+  .footer a{color:#fff;font-size:16px}
+  .footer a:hover{text-decoration:underline}
+
+  /* ===== Botões flutuantes ===== */
+  .fab-wrap{position:fixed;right:30px;bottom:24px;z-index:50;display:flex;flex-direction:column;align-items:flex-end;gap:12px}
+  .fab{width:70px;height:70px;border-radius:50%;background:#007f2e;border:0;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:transform .15s}
+  .fab:hover{transform:scale(1.06)}
+  .help-fab{position:fixed;right:6px;bottom:6px;width:36px;height:36px;border-radius:50%;background:#222;color:#fff;border:0;font-size:18px;display:flex;align-items:center;justify-content:center;z-index:60}
+  .chat{display:none;width:340px;max-width:calc(100vw - 40px);background:#fff;border-radius:14px;box-shadow:0 10px 36px rgba(0,0,0,.3);overflow:hidden}
+  .chat.open{display:block}
+  .chat-head{background:var(--green);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:17px}
+  .chat-head button{background:none;border:0;color:#fff;font-size:22px;line-height:1}
+  .chat-body{height:230px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:#f7f4f0}
+  .msg{max-width:85%;padding:10px 14px;border-radius:12px;font-size:15px;line-height:1.45}
+  .msg.bot{background:#fff;border:1px solid var(--border);align-self:flex-start}
+  .msg.me{background:var(--green-dark);color:#fff;align-self:flex-end}
+  .chat-form{display:flex;border-top:1px solid var(--border)}
+  .chat-form input{flex:1;border:0;padding:14px 16px;font:inherit;font-size:15px;outline:none}
+  .chat-form button{border:0;background:var(--green-dark);color:#fff;padding:0 18px;font-weight:600}
+
+  /* ===== Responsivo ===== */
+  @media (max-width:1200px){
+    .help-grid{grid-template-columns:repeat(2,1fr)}
+    .hero h1{font-size:52px}
+  }
+  @media (max-width:980px){
+    .hero{flex-direction:column;align-items:flex-start;padding:50px 20px}
+    .login-card{width:100%;max-width:520px}
+    .hl-grid{grid-template-columns:1fr}
+}
+  @media (max-width:640px){
+
+
+
+
+    .hero h1{font-size:40px}.hero p{font-size:19px}
+    .help-grid{grid-template-columns:1fr}
+    .section,.corp,.footer{padding-left:20px;padding-right:20px}
+    .btn-analyst{width:100%;justify-content:center}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+:host { display: block; }
+
+
+
+
+
+.hero { scroll-margin-top: 16px; }
+.help-fab { text-decoration: none; }
+.chat-form input { min-width: 0; }
+.chat-head h2 { font-size: 17px; }
+.chat-form button { min-height: 46px; }
+.info-dialog { width: min(540px, calc(100% - 32px)); padding: 32px; color: var(--text); border: 1px solid var(--border); border-radius: 14px; margin: auto; }
+.info-dialog::backdrop { background: #003f2a99; }
+.info-dialog h2 { color: var(--green-dark); font-size: 26px; padding-right: 32px; margin-bottom: 20px; }
+.info-dialog p { font-size: 17px; line-height: 1.6; white-space: pre-line; }
+.info-close { position: absolute; right: 12px; top: 10px; border: 0; background: none; font-size: 28px; padding: 4px 10px; color: var(--green-dark); }
+
+@media (max-width: 640px) {
+
+
+  .hero { gap: 32px; }
+  .login-card { padding: 28px; }
+  .help, .highlights { padding-block: 48px; }
+  .section h2.title, .corp h2 { font-size: 30px; }
+  .footer { height: auto; min-height: 56px; gap: 14px 24px; padding-block: 16px; padding-right: 70px; }
+  .fab-wrap { right: 20px; bottom: 52px; }
+  .fab { width: 58px; height: 58px; }
+}

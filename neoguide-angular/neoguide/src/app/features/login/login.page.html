@@ -1,0 +1,118 @@
+
+
+<!-- Topbar -->
+<app-public-header (login)="abrirLogin($event)" (conteudo)="abrirConteudo($event.id, $event.evento)" (chat)="abrirChat($event)" />
+
+<main id="inicio">
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-text">
+      <div class="eyebrow">Projetos de entrada de serviço</div>
+      <h1>Seu projeto aprovado na primeira análise</h1>
+      <p>Calcule a demanda conforme a DIS-NOR-053 e gere o memorial técnico sem retrabalho.</p>
+    </div>
+    <aside class="login-card" id="login">
+      <div class="icon">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M8 40c0-7 5-11 11-11s11 4 11 11z"/><path d="M12 20a7 7 0 0 1 14 0z"/><circle cx="19" cy="22" r="0"/><path d="M12 20h14"/><circle cx="36" cy="14" r="4"/><circle cx="36" cy="14" r="1" fill="currentColor"/><path d="M36 7v3M36 18v3M30 14h3M39 14h3"/></svg>
+      </div>
+      <h2>Área do Projetista</h2>
+      <p>Acesse seus projetos e cálculos de onde estiver.</p>
+      <a href="#entrar" (click)="abrirLogin($event)" class="btn btn-dark">Login</a>
+      <a href="#cadastro" (click)="abrirConteudo('cadastro', $event)" class="btn btn-light">Cadastre-se</a>
+    </aside>
+  </section>
+
+  <!-- Como o NeoGuide ajuda -->
+  <section class="section help" id="como-funciona">
+    <div class="kicker">Simples do início ao envio</div>
+    <h2 class="title">Como o NeoGuide ajuda</h2>
+    <div class="help-grid">
+      <article class="help-card">
+        <div class="circle"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></div>
+        <h3>Calcular a demanda</h3>
+        <p>Preenchimento guiado, etapa por etapa, com a norma da distribuidora.</p>
+      </article>
+      <article class="help-card">
+        <div class="circle"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h4M7 13h4M7 17h4M14 15l2 2 3-4"/></svg></div>
+        <h3>Validar os dados</h3>
+        <p>Alertas na hora, antes de o projeto chegar à Neoenergia.</p>
+      </article>
+      <article class="help-card">
+        <div class="circle"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h8l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M14 2v5h5M8 13h8M8 17h8"/></svg></div>
+        <h3>Gerar o memorial</h3>
+        <p>Memorial técnico pronto para enviar, sem montar à mão.</p>
+      </article>
+      <article class="help-card">
+        <div class="circle"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h16a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H8l-5 4V4a1 1 0 0 1 1-1z"/><path d="M8 8h8M8 12h8"/></svg></div>
+        <h3>Tirar dúvidas com o Neo</h3>
+        <p>Assistente que responde sobre a norma durante o preenchimento.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- Destaques -->
+  <section class="section highlights" id="destaques">
+    <div class="kicker">Conteúdo útil</div>
+    <h2 class="title">Destaques</h2>
+    <div class="hl-grid">
+      <a class="hl-card featured" href="#primeiro-acesso" (click)="abrirConteudo('primeiro-acesso', $event)" id="primeiro-acesso">
+        <div class="ico"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-7 7-7s7 3 7 7zM19 8v6M16 11h6"/></svg></div>
+        <h3>Primeiro acesso</h3>
+        <p>Veja como se cadastrar e começar seu primeiro projeto.</p>
+        <span class="more">Saiba mais <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+      <a class="hl-card" href="#norma" (click)="abrirConteudo('norma', $event)" id="norma">
+        <div class="ico"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h7a3 3 0 0 1 3 3v14a2 2 0 0 0-2-2H2zM22 4h-7a3 3 0 0 0-3 3v14a2 2 0 0 1 2-2h8zM15 8h4M15 12h4"/></svg></div>
+        <h3>Conheça a DIS-NOR-053</h3>
+        <p>Acesse a norma vigente e entenda seus principais pontos.</p>
+        <span class="more">Saiba mais <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+      <a class="hl-card" href="#passo-a-passo" (click)="abrirConteudo('passo-a-passo', $event)" id="passo-a-passo">
+        <div class="ico"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 8h4M14 7l3 3M17 7l-3 3M7 16h4M9 14v4M14 15h3M14 18h3"/></svg></div>
+        <h3>Passo a passo do cálculo</h3>
+        <p>Entenda as etapas do preenchimento guiado.</p>
+        <span class="more">Saiba mais <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Acesso corporativo -->
+  <section class="corp">
+    <div>
+      <div class="eyebrow">Acesso corporativo</div>
+      <h2>Você faz parte da equipe Neoenergia?</h2>
+      <p>Acesse a fila de análise em um ambiente exclusivo e seguro.</p>
+    </div>
+    <a routerLink="/login/neoenergia" class="btn-analyst">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="9" cy="11" r="2.5"/><path d="M5 17c0-2 2-3 4-3s4 1 4 3M15 9h4M15 13h4"/></svg>
+      Entrar como analista
+    </a>
+  </section>
+</main>
+
+<footer class="footer" id="ajuda">
+  <a href="#contato" (click)="abrirConteudo('contato', $event)">Contato</a>
+  <a href="#faq" (click)="abrirConteudo('faq', $event)">Dúvidas frequentes</a>
+  <a href="#privacidade" (click)="abrirConteudo('privacidade', $event)">Políticas e Avisos de Privacidade</a>
+</footer>
+
+<!-- Chat Neo + ajuda -->
+<div class="fab-wrap" id="ajuda-neo">
+  <section class="chat" [class.open]="chatAberto()" id="chat" role="region" aria-labelledby="titulo-chat">
+    <div class="chat-head"><h2 id="titulo-chat">Neo – assistente</h2><button type="button" (click)="fecharChat()" id="chatClose" aria-label="Fechar chat">×</button></div>
+    <div class="chat-body" id="chatBody" #chatBody role="log" aria-live="polite" aria-relevant="additions">@for (msg of mensagens(); track $index) { <div class="msg" [class.bot]="msg.autor === 'bot'" [class.me]="msg.autor === 'me'">{{ msg.texto }}</div> }</div>
+    <form class="chat-form" id="chatForm" (submit)="enviarMensagem($event, chatInput)"><input id="chatInput" #chatInput maxlength="2000" placeholder="Digite sua dúvida..." aria-label="Mensagem" autocomplete="off"><button type="submit">Enviar</button></form>
+  </section>
+  <button class="fab" id="chatFab" #chatFab type="button" aria-controls="chat" [attr.aria-expanded]="chatAberto()" [attr.aria-label]="chatAberto() ? 'Fechar chat' : 'Abrir chat'" (click)="alternarChat()">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M4 3h16a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H8l-5 4V4a1 1 0 0 1 1-1zm4 5v2h8V8zm0 4v2h6v-2z"/></svg>
+  </button>
+</div>
+<a class="help-fab" href="#faq" (click)="abrirConteudo('faq', $event)" aria-label="Ajuda">?</a>
+
+
+<dialog #conteudoDialog class="info-dialog" aria-labelledby="titulo-conteudo" (click)="fecharNoFundo($event)">
+  <button type="button" class="info-close" aria-label="Fechar" (click)="fecharConteudo()">×</button>
+  <h2 id="titulo-conteudo">{{ conteudo().titulo }}</h2>
+  <p>{{ conteudo().texto }}</p>
+</dialog>
+<app-login-dialog (fechou)="limparQuery()" />
