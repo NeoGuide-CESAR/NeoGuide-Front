@@ -1,0 +1,98 @@
+<dialog
+  #dialog
+  class="janela"
+  aria-labelledby="titulo-login"
+  (close)="aoFechar()"
+  (click)="cliqueNoFundo($event)"
+>
+  <div class="janela__corpo">
+    <div class="janela__topo">
+      <h2 id="titulo-login" class="ng-titulo-secao">Login</h2>
+      <button type="button" class="ng-icon-btn" aria-label="Fechar" (click)="fechar()">
+        <span class="ms" aria-hidden="true">close</span>
+      </button>
+    </div>
+
+    <span class="selo">
+      <span class="ms" aria-hidden="true">engineering</span>
+      Área do Projetista
+    </span>
+
+    <p>Informe seu CPF/CNPJ ou e-mail e a senha:</p>
+
+    <form [formGroup]="form" (ngSubmit)="entrar()" novalidate class="form">
+      @if (erroServidor(); as erro) {
+        <div class="alerta" role="alert">
+          <span class="ms" aria-hidden="true">error</span>
+          <span>{{ erro }}</span>
+        </div>
+      }
+
+      <!-- CPF/CNPJ ou e-mail -->
+      <div class="campo" [class.campo--erro]="mensagemDocumento()">
+        <label for="documento" class="campo__rotulo">CPF/CNPJ ou e-mail</label>
+        <div class="campo__caixa">
+          <input
+            #campoDocumento
+            id="documento"
+            type="text"
+            formControlName="documento"
+            autocomplete="username"
+            inputmode="email"
+            spellcheck="false"
+            [attr.aria-invalid]="!!mensagemDocumento()"
+            [attr.aria-describedby]="mensagemDocumento() ? 'erro-documento' : null"
+          />
+        </div>
+        @if (mensagemDocumento(); as msg) {
+          <span id="erro-documento" class="campo__erro">
+            <span class="ms" aria-hidden="true">error</span>{{ msg }}
+          </span>
+        }
+      </div>
+
+      <!-- Senha -->
+      <div class="campo" [class.campo--erro]="mensagemSenha()">
+        <label for="senha" class="campo__rotulo">Senha</label>
+        <div class="campo__caixa">
+          <input
+            id="senha"
+            [type]="mostrarSenha() ? 'text' : 'password'"
+            formControlName="senha"
+            autocomplete="current-password"
+            [attr.aria-invalid]="!!mensagemSenha()"
+            [attr.aria-describedby]="mensagemSenha() ? 'erro-senha' : null"
+          />
+          <button
+            type="button"
+            class="ng-icon-btn campo__olho"
+            [attr.aria-label]="mostrarSenha() ? 'Ocultar senha' : 'Mostrar senha'"
+            [attr.aria-pressed]="mostrarSenha()"
+            (click)="alternarSenha()"
+          >
+            <span class="ms" aria-hidden="true">{{ mostrarSenha() ? 'visibility' : 'visibility_off' }}</span>
+          </button>
+        </div>
+        @if (mensagemSenha(); as msg) {
+          <span id="erro-senha" class="campo__erro">
+            <span class="ms" aria-hidden="true">error</span>{{ msg }}
+          </span>
+        }
+      </div>
+
+      <div class="esqueci"><a href="#">Esqueceu sua senha?</a></div>
+
+      <button type="submit" class="ng-btn ng-btn--primario entrar" [disabled]="enviando()">
+        @if (enviando()) {
+          <span class="spinner" aria-hidden="true"></span> Entrando…
+        } @else {
+          Entrar
+        }
+      </button>
+    </form>
+
+    <p class="centro">Não possui cadastro? <a href="#">Cadastre-se</a></p>
+    <hr class="divisor" />
+    <p class="centro legal">Conheça aqui as nossas <a href="#">Políticas e Avisos de Privacidade</a>.</p>
+  </div>
+</dialog>

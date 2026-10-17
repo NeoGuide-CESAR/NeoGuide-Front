@@ -1,0 +1,39 @@
+:host { display: flex; flex-direction: column; min-height: 100dvh; }
+app-site-header { min-height: 69px; padding-top: 5px; background: var(--ng-verde); }
+.trocar { display: flex; align-items: center; gap: 8px; color: white; text-decoration: none; font-size: 14px; font-weight: 600; white-space: nowrap; }
+.trocar:hover { text-decoration: underline; }
+main { flex: 1; display: grid; grid-template-columns: 1fr 1fr; min-height: 786px; }
+.apresentacao { position: relative; display: flex; align-items: flex-end; padding: 64px 48px 64px var(--ng-gutter); color: white; background: repeating-linear-gradient(135deg, #00442e 0, #00442e 14px, #004a32 14px, #004a32 28px); }
+.foto { position: absolute; top: 40px; left: var(--ng-gutter); color: #70a28e; font-size: 13px; }
+.apresentacao__texto { max-width: 465px; }
+.etiqueta { color: #58cc8e; letter-spacing: 1px; font-size: 14px; font-weight: 700; margin-bottom: 20px; }
+h1 { font-size: clamp(30px, 2.8vw, 40px); line-height: 1.2; font-weight: 700; }
+ul { list-style: none; padding: 0; margin: 24px 0 0; display: grid; gap: 12px; }
+li { display: flex; gap: 10px; align-items: flex-start; font-size: 16px; line-height: 20px; }
+li .ms { color: #58cc8e; font-size: 18px; }
+.acesso { display: flex; justify-content: center; align-items: flex-start; padding: 119px 32px 64px; }
+.cartao { width: 440px; max-width: 100%; padding: 32px; }
+h2 { display: flex; align-items: center; gap: 12px; font-size: 24px; color: var(--ng-texto-3); margin-bottom: 20px; }
+.icone { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; background: var(--ng-verde-profundo); color: white; }
+.icone .ms { font-size: 20px; }
+.cartao > p:not(.aviso):not(.mensagem) { font-size: 16px; line-height: 24px; }
+.corporativo { width: 100%; margin-top: 16px; padding-inline: 12px; letter-spacing: 0; font-weight: 600; }
+.corporativo .ms { font-size: 20px; }
+.separador { display: flex; align-items: center; gap: 12px; color: var(--ng-texto-3); font-size: 14px; margin: 20px 0; }
+.separador::before, .separador::after { content: ''; height: 1px; background: var(--ng-borda); flex: 1; }
+form { display: flex; flex-direction: column; gap: 16px; }
+input { width: 100%; min-height: 49px; border: 1px solid var(--ng-borda-campo); border-radius: var(--ng-raio-campo); padding: 12px 14px; font: 13px var(--ng-fonte); background: white; color: var(--ng-texto); }
+input:focus-visible { outline: 2px solid var(--ng-link); outline-offset: 2px; }
+.senha { position: relative; }
+.senha input { padding-right: 48px; }
+.senha button { position: absolute; right: 4px; top: 2px; }
+.senha .ms { font-size: 18px; }
+.recuperar { align-self: flex-end; border: 0; padding: 0; background: none; color: var(--ng-link); text-decoration: underline; font: 14px var(--ng-fonte); cursor: pointer; }
+.entrar { align-self: center; width: 220px; max-width: 100%; }
+.aviso { display: flex; gap: 12px; padding: 14px; margin-top: 16px; border-radius: 4px; background: #fff5ec; color: var(--ng-texto-2); font-size: 12px; line-height: 18px; }
+.aviso .ms { color: #d95b00; font-size: 18px; }
+.mensagem { margin-top: 16px; padding: 12px; background: var(--ng-info-bg); color: var(--ng-texto); font-size: 14px; line-height: 20px; border-radius: 4px; }
+@media (min-height: 901px) { main { min-height: calc(100dvh - 114px); } }
+@media (max-width: 1000px) { .apresentacao { padding-left: 32px; padding-right: 32px; } .foto { left: 32px; right: 24px; } .acesso { padding-inline: 24px; } .cartao { padding: 24px; } }
+@media (max-width: 760px) { main { grid-template-columns: 1fr; min-height: auto; } .apresentacao { padding: 96px 24px 32px; } .foto { left: 24px; top: 24px; } .apresentacao__texto { max-width: 100%; } h1 { max-width: 480px; } .acesso { padding: 32px 16px; } }
+@media (max-width: 400px) { .trocar { font-size: 12px; gap: 4px; } h2 { font-size: 21px; } .corporativo { font-size: 12px; } }

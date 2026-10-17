@@ -1,0 +1,44 @@
+<header class="topbar">
+  <div class="brand">
+    <div class="logo-box" aria-label="Neoenergia">
+      <svg width="30" height="34" viewBox="0 0 30 34" aria-hidden="true"><path d="M4 30C0 20 6 8 16 4c-2 8 0 14 6 18-4 6-12 9-18 8z" fill="#00a443"/><path d="M18 2c8 6 10 16 4 24-5-5-6-14-4-24z" fill="#f7931e"/></svg>
+      <span>Neoenergia</span>
+    </div>
+    <div class="brand-divider"></div>
+    <span class="brand-name">NeoGuide</span>
+  </div>
+  <div class="top-actions"><a routerLink="/login/neoenergia" class="neo-access">Acesso Neoenergia</a><a href="#entrar" (click)="login.emit($event)" class="btn-login-top">Login
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+  </a></div>
+</header>
+
+<!-- Navegação -->
+<nav class="nav" aria-label="Principal">
+  <button class="nav-toggle" id="navToggle" #navToggle [attr.aria-label]="menuMobile() ? 'Fechar menu' : 'Abrir menu'" aria-controls="navMenu" [attr.aria-expanded]="menuMobile()" (click)="alternarMobile($event)">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+  <div class="nav-menu" id="navMenu" [class.open]="menuMobile()">
+    <div class="nav-item"><a href="#inicio" class="nav-link active">Início</a></div>
+    <div class="nav-item" [class.open]="submenu() === 0">
+      <button class="nav-link" aria-haspopup="true" [attr.aria-expanded]="submenu() === 0" aria-controls="submenu-0" (click)="alternarSubmenu(0, $event)">Como funciona
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="dropdown" id="submenu-0">
+        <a href="#primeiro-acesso" (click)="conteudo.emit({ id: 'primeiro-acesso', evento: $event })">Primeiro acesso</a>
+        <a href="#passo-a-passo" (click)="conteudo.emit({ id: 'passo-a-passo', evento: $event })">Passo a passo do cálculo</a>
+        <a href="#ajuda-neo" (click)="chat.emit($event)">Tirar dúvidas com o Neo</a>
+      </div>
+    </div>
+    <div class="nav-item" [class.open]="submenu() === 1">
+      <button class="nav-link" aria-haspopup="true" [attr.aria-expanded]="submenu() === 1" aria-controls="submenu-1" (click)="alternarSubmenu(1, $event)">Norma DIS-NOR-053
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="dropdown" id="submenu-1">
+        <a href="#norma" (click)="conteudo.emit({ id: 'norma', evento: $event })">Conheça a norma</a>
+        <a href="#norma-pontos" (click)="conteudo.emit({ id: 'norma-pontos', evento: $event })">Principais pontos</a>
+        <a href="#norma-download" (click)="conteudo.emit({ id: 'norma-download', evento: $event })">Baixar norma vigente</a>
+      </div>
+    </div>
+    <div class="nav-item"><a href="#ajuda" class="nav-link">Ajuda</a></div>
+  </div>
+</nav>

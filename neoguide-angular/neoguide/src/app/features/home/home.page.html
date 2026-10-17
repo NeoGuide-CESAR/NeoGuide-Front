@@ -1,0 +1,118 @@
+<app-site-header [links]="links">
+  <div class="usuario">
+    <button
+      type="button"
+      class="usuario__btn"
+      aria-haspopup="menu"
+      [attr.aria-expanded]="menuAberto()"
+      aria-controls="menu-usuario"
+      (click)="alternarMenu()"
+    >
+      <span class="ms usuario__avatar" aria-hidden="true">account_circle</span>
+      <span class="usuario__nome">{{ usuario()?.nome }}</span>
+      <span class="ms" aria-hidden="true">{{ menuAberto() ? 'expand_less' : 'expand_more' }}</span>
+    </button>
+
+    @if (menuAberto()) {
+      <ul id="menu-usuario" class="usuario__menu" role="menu">
+        <li role="none">
+          <a role="menuitem" href="#"><span class="ms" aria-hidden="true">person</span>Meu perfil</a>
+        </li>
+        <li role="none">
+          <button role="menuitem" type="button" (click)="sair()">
+            <span class="ms" aria-hidden="true">logout</span>Sair
+          </button>
+        </li>
+      </ul>
+    }
+  </div>
+</app-site-header>
+
+<main class="ng-container conteudo">
+  <!-- Saudação + indicadores -->
+  <section class="boas-vindas" aria-labelledby="ola">
+    <div class="boas-vindas__texto">
+      <h1 id="ola">Olá, {{ primeiroNome() }}</h1>
+      <p>O que você quer fazer hoje?</p>
+    </div>
+
+    <ul class="indicadores" aria-label="Resumo dos seus projetos">
+      @for (ind of indicadores(); track ind.status) {
+        <li class="ng-card indicador">
+          <span class="indicador__valor" [attr.data-status]="ind.status">{{ ind.valor }}</span>
+          <span class="indicador__rotulo">
+            <span class="ms" aria-hidden="true">{{ statusInfo[ind.status].icone }}</span>{{ ind.rotulo }}
+          </span>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <!-- Acesso rápido -->
+  <section class="secao" aria-labelledby="acesso-rapido">
+    <h2 id="acesso-rapido" class="ng-titulo-secao">Acesso rápido</h2>
+    <ul class="atalhos">
+      @for (a of atalhos(); track a.titulo) {
+        <li>
+          <a class="ng-card atalho" [class.atalho--destaque]="a.destaque" [href]="a.href">
+            <span class="atalho__topo">
+              <span class="ms" aria-hidden="true">{{ a.icone }}</span>
+              <span class="atalho__titulo">{{ a.titulo }}</span>
+            </span>
+            <span class="atalho__texto">{{ a.texto }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <div class="duas-colunas">
+    <!-- Projetos recentes -->
+    <section class="secao" aria-labelledby="recentes">
+      <div class="secao__cabecalho">
+        <h2 id="recentes" class="ng-titulo-secao">Projetos recentes</h2>
+        <a href="#" class="ver-todos">Ver todos <span class="ms" aria-hidden="true">arrow_forward</span></a>
+      </div>
+
+      @if (recentes().length) {
+        <ul class="projetos">
+          @for (p of recentes(); track p.id) {
+            <li>
+              <a class="projeto" href="#">
+                <span class="projeto__nome">{{ p.nome }}</span>
+                <span class="projeto__meta">
+                  <time [attr.datetime]="p.atualizadoEm">{{ p.atualizadoEm | date: 'dd/MM/yyyy' }}</time>
+                  <span class="status" [attr.data-status]="p.status">
+                    <span class="ms" aria-hidden="true">{{ statusInfo[p.status].icone }}</span>
+                    {{ statusInfo[p.status].rotulo }}
+                  </span>
+                  <span class="ms projeto__seta" aria-hidden="true">chevron_right</span>
+                </span>
+              </a>
+            </li>
+          }
+        </ul>
+      } @else {
+        <div class="vazio">
+          <span class="ms" aria-hidden="true">folder_open</span>
+          <p>Você ainda não tem projetos. Comece pelo <strong>Novo projeto</strong>.</p>
+        </div>
+      }
+    </section>
+
+    <!-- Novidades -->
+    <section class="secao" aria-labelledby="novidades">
+      <h2 id="novidades" class="ng-titulo-secao">Novidades</h2>
+      <article class="novidade">
+        <div class="novidade__img" aria-hidden="true">[imagem]</div>
+        <div class="novidade__corpo">
+          <span class="novidade__tag">NORMA</span>
+          <h3>[Título de um aviso sobre a norma ou o sistema]</h3>
+          <a href="#" class="ver-todos">Continue lendo <span class="ms" aria-hidden="true">arrow_forward</span></a>
+        </div>
+      </article>
+    </section>
+  </div>
+</main>
+
+<app-site-footer />
