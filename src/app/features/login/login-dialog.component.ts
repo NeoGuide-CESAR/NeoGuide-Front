@@ -21,6 +21,7 @@ import { documentoOuEmailValidator } from '../../shared/validators/documento.val
  */
 @Component({
   selector: 'app-login-dialog',
+  standalone: true,
   imports: [ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './login-dialog.component.html',

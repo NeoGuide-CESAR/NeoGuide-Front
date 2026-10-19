@@ -171,3 +171,47 @@ $light-mode-input-disabled-bg: #f3f4f6;
 
 $light-mode-input-placeholder-color: #9ca3af;
 
+
+// =======================
+// NeoGuide — tokens de marca (tirados do moodboard)
+// =======================
+:root {
+  /* Verdes da marca */
+  --ng-verde: #00a443;         /* barra superior, destaques */
+  --ng-verde-escuro: #007f33;  /* títulos, botão primário, nav */
+  --ng-verde-profundo: #00402a;
+  --ng-verde-claro: #dcebe1;
+  --ng-laranja: #ff9c1a;       /* card de destaque */
+
+  /* Neutros */
+  --ng-texto: #212f2b;
+  --ng-texto-2: #3a3735;
+  --ng-texto-3: #615d5a;
+  --ng-cinza: #707070;
+  --ng-borda: #d8cfc7;
+  --ng-borda-campo: #89837e;
+  --ng-fundo-suave: #f1ede9;
+  --ng-creme: #fffaf6;
+  --ng-branco: #ffffff;
+
+  /* Status */
+  --ng-info: #2e5aac;
+  --ng-info-bg: #eaf0fa;
+  --ng-erro: #b71010;
+  --ng-erro-bg: #fdeded;
+  --ng-link: #007acb;
+
+  /* Raios e layout */
+  --ng-raio-card: 10px;
+  --ng-raio-campo: 5px;
+  --ng-raio-pill: 25px;
+  --ng-gutter: clamp(16px, 10.4vw, 150px);
+  --ng-max: 1140px;
+
+  --ng-fonte: 'IberPangea Text', Figtree, system-ui, sans-serif;
+}
+
+@media (max-width: 600px) {
+  :root { --ng-gutter: 16px; }
+}
+

@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../core/auth/auth.service';
 import { ProjetosService } from '../../core/projetos/projetos.service';
@@ -15,12 +15,13 @@ import { STATUS_INFO, StatusProjeto } from '../../core/projetos/projeto.model';
 import { LinkNav, SiteHeaderComponent } from '../../shared/layout/site-header.component';
 import { SiteFooterComponent } from '../../shared/layout/site-footer.component';
 
-interface Atalho { icone: string; titulo: string; texto: string; href: string; destaque?: boolean; }
+interface Atalho { icone: string; titulo: string; texto: string; rota?: string; href?: string; destaque?: boolean; }
 
 /** Home do projetista (artboard 09). */
 @Component({
   selector: 'app-home-page',
-  imports: [DatePipe, SiteHeaderComponent, SiteFooterComponent],
+  standalone: true,
+  imports: [DatePipe, RouterLink, SiteHeaderComponent, SiteFooterComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './home.page.html',
   styleUrl: './home.page.scss',
@@ -70,7 +71,7 @@ export class HomePage {
         texto: rascunho
           ? `${rascunho.nome}: etapa ${rascunho.etapaAtual} de ${rascunho.totalEtapas} do preenchimento.`
           : 'Você não tem cálculos em andamento.',
-        href: '#',
+        ...(rascunho ? { rota: `/projetos/${rascunho.id}/calculo` } : { href: '#' }),
       },
       { icone: 'menu_book', titulo: 'Norma DIS-NOR-053', texto: 'Consulte a versão vigente da norma da distribuidora.', href: '#' },
       { icone: 'chat', titulo: 'Tirar dúvidas com o Neo', texto: 'Pergunte sobre a norma enquanto preenche.', href: '#' },
