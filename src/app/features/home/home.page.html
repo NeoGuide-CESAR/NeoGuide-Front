@@ -54,13 +54,23 @@
     <ul class="atalhos">
       @for (a of atalhos(); track a.titulo) {
         <li>
-          <a class="ng-card atalho" [class.atalho--destaque]="a.destaque" [href]="a.href">
-            <span class="atalho__topo">
-              <span class="ms" aria-hidden="true">{{ a.icone }}</span>
-              <span class="atalho__titulo">{{ a.titulo }}</span>
-            </span>
-            <span class="atalho__texto">{{ a.texto }}</span>
-          </a>
+          @if (a.rota) {
+            <a class="ng-card atalho" [class.atalho--destaque]="a.destaque" [routerLink]="a.rota">
+              <span class="atalho__topo">
+                <span class="ms" aria-hidden="true">{{ a.icone }}</span>
+                <span class="atalho__titulo">{{ a.titulo }}</span>
+              </span>
+              <span class="atalho__texto">{{ a.texto }}</span>
+            </a>
+          } @else {
+            <a class="ng-card atalho" [class.atalho--destaque]="a.destaque" [href]="a.href">
+              <span class="atalho__topo">
+                <span class="ms" aria-hidden="true">{{ a.icone }}</span>
+                <span class="atalho__titulo">{{ a.titulo }}</span>
+              </span>
+              <span class="atalho__texto">{{ a.texto }}</span>
+            </a>
+          }
         </li>
       }
     </ul>

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 @Component({
   selector: 'app-site-footer',
+  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <footer class="rodape">

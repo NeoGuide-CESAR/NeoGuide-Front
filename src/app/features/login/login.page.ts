@@ -7,6 +7,7 @@ interface Conteudo { titulo: string; texto: string; }
 
 @Component({
   selector: 'app-login-page',
+  standalone: true,
   imports: [LoginDialogComponent, RouterLink, PublicHeaderComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './login.page.html',

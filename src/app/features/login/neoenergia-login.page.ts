@@ -8,6 +8,7 @@ import { SiteFooterComponent } from '../../shared/layout/site-footer.component';
 
 @Component({
   selector: 'app-neoenergia-login-page',
+  standalone: true,
   imports: [ReactiveFormsModule, RouterLink, SiteHeaderComponent, SiteFooterComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './neoenergia-login.page.html',

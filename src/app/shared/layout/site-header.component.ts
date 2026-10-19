@@ -15,6 +15,7 @@ export interface LinkNav {
  */
 @Component({
   selector: 'app-site-header',
+  standalone: true,
   imports: [RouterLink, RouterLinkActive],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
