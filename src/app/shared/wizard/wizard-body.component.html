@@ -1,0 +1,110 @@
+<div class="wizard__titulo">
+  <nav aria-label="Breadcrumb" class="wizard__breadcrumb">
+    @for (item of breadcrumb(); track item.label; let last = $last) {
+      @if (item.href && !last) {
+        <a class="wizard__breadcrumb-link" [href]="item.href">{{ item.label }}</a>
+        <span class="wizard__breadcrumb-separador" aria-hidden="true">&gt;</span>
+      } @else {
+        <span class="wizard__breadcrumb-atual" [attr.aria-current]="last ? 'page' : null">{{ item.label }}</span>
+      }
+    }
+  </nav>
+
+  <h1 class="wizard__titulo-texto">{{ titulo() }}</h1>
+  <p class="wizard__subtitulo">{{ subtitulo() }}</p>
+</div>
+
+<nav class="ng-card wizard__stepper" aria-label="Etapas do formulário">
+  <ol class="wizard__stepper-lista">
+    @for (etapa of etapas(); track etapa.id; let i = $index) {
+      <li class="wizard__stepper-item">
+        <button
+          type="button"
+          class="wizard__stepper-botao"
+          [class.wizard__stepper-botao--atual]="estadoEtapa(i) === 'atual'"
+          [class.wizard__stepper-botao--concluida]="estadoEtapa(i) === 'concluida'"
+          [class.wizard__stepper-botao--bloqueada]="estadoEtapa(i) === 'bloqueada'"
+          [attr.aria-current]="estadoEtapa(i) === 'atual' ? 'step' : null"
+          [attr.aria-disabled]="!etapaLiberada(i)"
+          [disabled]="!etapaLiberada(i)"
+          (click)="irParaEtapa(i)"
+        >
+          <span class="wizard__stepper-circulo" aria-hidden="true">
+            @switch (estadoEtapa(i)) {
+              @case ('concluida') { <span class="ms">check</span> }
+              @case ('bloqueada') { <span class="ms">lock</span> }
+              @default { {{ i + 1 }} }
+            }
+          </span>
+          <span class="wizard__stepper-rotulo">{{ etapa.label }}</span>
+        </button>
+      </li>
+    }
+  </ol>
+</nav>
+
+@if (!etapaAtualCompleta()) {
+  <p class="wizard__dica">
+    <span class="ms" aria-hidden="true">lock</span>
+    Preencha os campos obrigatórios abaixo para liberar as próximas etapas.
+  </p>
+}
+
+<section class="ng-card wizard__etapa-card">
+  <p class="wizard__etapa-rotulo">Etapa {{ etapaAtual() + 1 }} de {{ etapas().length }}</p>
+  <h2 class="wizard__etapa-titulo">{{ etapaAtiva().title }}</h2>
+
+  <div class="wizard__etapa-separador"></div>
+
+  <div class="wizard__etapa-slot">
+    @switch (etapaAtiva().id) {
+      @case ('dados') {
+        <dl class="wizard__dados">
+          @for (item of dadosProjeto; track item.rotulo) {
+            <div class="wizard__dados-linha">
+              <dt>{{ item.rotulo }}</dt>
+              @if (item.tag) {
+                <dd class="wizard__dados-tag">{{ item.valor }}</dd>
+              } @else {
+                <dd>{{ item.valor }}</dd>
+              }
+            </div>
+          }
+        </dl>
+      }
+      @default {
+        <p class="wizard__placeholder">Conteúdo da etapa "{{ etapaAtiva().label }}".</p>
+      }
+    }
+  </div>
+</section>
+
+<footer class="wizard__rodape">
+  <button type="button" class="ng-btn wizard__cancelar" (click)="cancelar.emit()">Cancelar</button>
+
+  <p class="wizard__obrigatorio">* obrigatório</p>
+
+  <div class="wizard__rodape-acoes">
+    <button
+      type="button"
+      class="ng-btn wizard__voltar"
+      [disabled]="etapaAtual() === 0"
+      (click)="voltarEtapa()"
+    >
+      <span class="ms" aria-hidden="true">arrow_back</span> Voltar
+    </button>
+
+    <button
+      type="button"
+      class="ng-btn wizard__avancar"
+      [disabled]="!etapaAtualCompleta()"
+      (click)="avancarEtapa()"
+    >
+      @if (ehUltimaEtapa()) {
+        Concluir
+      } @else {
+        Criar e avançar <span class="ms" aria-hidden="true">arrow_forward</span>
+      }
+    </button>
+  </div>
+</footer>

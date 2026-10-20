@@ -1,0 +1,9 @@
+<app-site-header [links]="links" />
+
+<app-wizard-body
+  titulo="Cálculo de demanda"
+  subtitulo="Comece pelos dados da edificação. As próximas etapas dependem do que você marcar aqui."
+  [breadcrumb]="breadcrumbWizard"
+  (cancelar)="cancelar()"
+  (concluir)="concluir()"
+/>
