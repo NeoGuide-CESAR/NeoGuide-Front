@@ -3,3 +3,6 @@
   flex-direction: column;
   min-height: 100dvh;
 }
+.usuario { display:flex;align-items:center;gap:6px;min-height:44px;padding:0 10px;background:#007f3380;border-radius:5px;color:white;font:500 14px var(--ng-fonte); }
+.usuario .ms { font-size:20px; }
+@media(max-width:600px){.usuario{font-size:0;gap:0}.usuario .ms:last-child{display:none}}

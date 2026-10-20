@@ -1,0 +1,193 @@
+:host {
+  display:block}
+  form {
+    font-size:16px}
+    .grade {
+      display:grid;
+      grid-template-columns:repeat(12,minmax(0,1fr));
+      gap:28px 24px}
+      .campo {
+        grid-column:span var(--colunas);
+        min-width:0}
+        .entrada {
+          position:relative}
+          .entrada>label {
+            position:absolute;
+            top:-8px;
+            left:10px;
+            padding:0 4px;
+            background:white;
+            font-size:13px;
+            line-height:15px;
+            color:var(--ng-verde-escuro);
+            z-index:1}
+            .entrada>input,.entrada>select {
+              width:100%;
+              height:48px;
+              border:1px solid var(--ng-borda-campo);
+              border-radius:var(--ng-raio-campo);
+              padding:0 14px;
+              font:400 16px var(--ng-fonte);
+              color:var(--ng-texto);
+              background:white;
+              appearance:none}
+              .entrada>select {
+                padding-right:36px}
+                .entrada.invalida>input,.entrada.invalida>select {
+                  border-color:var(--ng-erro);
+                  background:var(--ng-erro-bg)}
+                  .invalida>label {
+                    color:var(--ng-erro)}
+                    input:focus-visible,select:focus-visible,.link:focus-visible {
+                      outline:3px solid #007f3340;
+                      outline-offset:2px}
+                      .seta {
+                        position:absolute;
+                        right:12px;
+                        top:14px;
+                        font-size:20px;
+                        pointer-events:none}
+                        .link {
+                          display:inline-flex;
+                          align-items:center;
+                          min-height:44px;
+                          color:var(--ng-link);
+                          font:inherit;
+                          font-size:13px;
+                          text-decoration:underline;
+                          border:0;
+                          background:transparent;
+                          cursor:pointer;
+                          padding:0}
+                          .erro {
+                            font-size:13px;
+                            color:var(--ng-erro);
+                            line-height:1.5;
+                            margin-top:8px}
+                            .alerta {
+                              padding:14px 16px;
+                              margin-bottom:28px;
+                              border:1px solid var(--ng-erro);
+                              border-radius:5px;
+                              background:var(--ng-erro-bg);
+                              color:var(--ng-erro);
+                              font-size:14px}
+                              #cep-aviso {
+                                font-size:13px;
+                                margin-top:4px;
+                                line-height:1.5}
+                                #cep-aviso>p {
+                                  padding-top:6px}
+                                  .aviso:empty {
+                                    display:none}
+                                    .aviso:not(:empty) {
+                                      margin-top:16px}
+                                      .aviso .erro {
+                                        margin:0}
+                                        .sucesso {
+                                          display:flex;
+                                          align-items:flex-start;
+                                          gap:6px;
+                                          color:var(--ng-verde-escuro);
+                                          font-size:13px;
+                                          line-height:1.5}
+                                          .sucesso .ms {
+                                            font-size:18px}
+                                            fieldset {
+                                              min-width:0;
+                                              margin:28px 0 0;
+                                              padding:28px 0 0;
+                                              border:0;
+                                              border-top:1px solid var(--ng-borda)}
+                                              legend {
+                                                float:left;
+                                                width:100%;
+                                                font-size:18px;
+                                                font-weight:700;
+                                                color:var(--ng-verde-profundo);
+                                                margin-bottom:6px}
+                                                fieldset>p {
+                                                  clear:both;
+                                                  font-size:13px;
+                                                  color:var(--ng-texto-3);
+                                                  line-height:1.5}
+                                                  .opcoes {
+                                                    display:grid;
+                                                    grid-template-columns:1fr 1fr;
+                                                    gap:24px;
+                                                    margin-top:20px}
+                                                    .opcao {
+                                                      display:flex;
+                                                      align-items:flex-start;
+                                                      gap:14px;
+                                                      padding:20px;
+                                                      border:1px solid var(--ng-borda);
+                                                      border-radius:10px;
+                                                      cursor:pointer}
+                                                      .opcao:has(:checked) {
+                                                        border-color:var(--ng-verde-escuro);
+                                                        box-shadow:inset 0 0 0 1px var(--ng-verde-escuro);
+                                                        background:#eef5f0}
+                                                        .opcao>input {
+                                                          width:20px;
+                                                          height:20px;
+                                                          margin:2px 0 0;
+                                                          accent-color:var(--ng-verde-escuro);
+                                                          flex-shrink:0}
+                                                          .icone {
+                                                            font-size:28px;
+                                                            color:var(--ng-verde-escuro)}
+                                                            .opcao-texto {
+                                                              display:flex;
+                                                              flex-direction:column;
+                                                              gap:6px;
+                                                              min-width:0}
+                                                              .opcao strong {
+                                                                font-size:16px;
+                                                                line-height:1.4;
+                                                                font-weight:700}
+                                                                .chip {
+                                                                  display:inline-flex;
+                                                                  align-items:center;
+                                                                  align-self:flex-start;
+                                                                  gap:4px;
+                                                                  min-height:26px;
+                                                                  padding:3px 10px;
+                                                                  border-radius:25px;
+                                                                  font-size:12px;
+                                                                  font-weight:500;
+                                                                  background:var(--ng-fundo-suave);
+                                                                  color:var(--ng-texto-3)}
+                                                                  .opcao:has(:checked) .chip {
+                                                                    background:var(--ng-verde-claro);
+                                                                    color:#0b4d33}
+                                                                    .chip .ms {
+                                                                      font-size:16px}
+                                                                      .spinner {
+                                                                        position:absolute;
+                                                                        right:12px;
+                                                                        top:15px;
+                                                                        width:18px;
+                                                                        height:18px;
+                                                                        border:2px solid var(--ng-borda);
+                                                                        border-top-color:var(--ng-verde-escuro);
+                                                                        border-radius:50%;
+                                                                        animation:girar .8s linear infinite}
+                                                                        @keyframes girar {
+                                                                          to {
+                                                                            transform:rotate(360deg)}
+                                                                          }
+                                                                          @media(max-width:719px) {
+                                                                            .campo {
+                                                                              grid-column:1/-1}
+                                                                              .campo.uf {
+                                                                                grid-column:span 4}
+                                                                                .grade {
+                                                                                  gap:26px 16px}
+                                                                                  .opcoes {
+                                                                                    grid-template-columns:1fr;
+                                                                                    gap:16px}
+                                                                                    .opcao {
+                                                                                      padding:16px;
+                                                                                      gap:10px}
+                                                                                    }
