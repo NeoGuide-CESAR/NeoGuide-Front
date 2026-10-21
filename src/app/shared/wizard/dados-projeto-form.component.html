@@ -1,0 +1,54 @@
+<form [formGroup]="form" novalidate (submit)="$event.preventDefault()">
+  @if (enviado() && quantidadeErros) { <p class="alerta" role="alert">{{ resumo }}</p> }
+  <div class="grade">
+    @for (campo of campos; track campo.nome) {
+      <div class="campo" [class.uf]="campo.nome === 'uf'" [style.--colunas]="campo.colunas">
+        <div class="entrada" [class.invalida]="erro(campo.nome)">
+          <label [for]="'projeto-' + campo.nome">{{ campo.label }}</label>
+          @if (campo.nome === 'tipoEdificacao') {
+            <select [id]="'projeto-' + campo.nome" [formControlName]="campo.nome" [attr.aria-invalid]="erro(campo.nome)" [attr.aria-describedby]="erro(campo.nome) ? 'erro-' + campo.nome : null">
+              <option value="">Selecione</option>
+              @for (tipo of tipos; track tipo) { <option [value]="tipo">{{ tipo }}</option> }
+            </select>
+            <span class="ms seta" aria-hidden="true">expand_more</span>
+          } @else {
+            <input [id]="'projeto-' + campo.nome" [formControlName]="campo.nome" [placeholder]="campo.placeholder" [attr.maxlength]="campo.nome === 'uf' ? 2 : campo.nome === 'cep' ? 9 : campo.nome === 'nome' ? 120 : null" [attr.inputmode]="campo.nome === 'cep' ? 'numeric' : 'text'" [attr.autocomplete]="campo.nome === 'cep' ? 'postal-code' : campo.nome === 'uf' ? 'address-level1' : campo.nome === 'municipio' ? 'address-level2' : 'off'" [attr.aria-invalid]="erro(campo.nome)" [attr.aria-describedby]="campo.nome === 'cep' ? 'cep-aviso' : erro(campo.nome) ? 'erro-' + campo.nome : null" [attr.aria-busy]="campo.nome === 'cep' && estadoCep() === 'buscando' ? true : null" (input)="normalizar(campo.nome, $event)" />
+          }
+          @if (campo.nome === 'cep' && estadoCep() === 'buscando') { <span class="spinner" aria-hidden="true"></span> }
+        </div>
+        @if (campo.nome === 'cep') {
+          <div id="cep-aviso" aria-live="polite" [class.erro]="erro('cep')">
+            @switch (estadoCep()) {
+              @case ('buscando') { <p>Buscando endereço…</p> }
+              @case ('nao-encontrado') { <p>CEP não encontrado.</p> }
+              @case ('fora-concessao') { <p>CEP fora da área de concessão da Neoenergia.</p> }
+              @case ('falha') { <p>Não foi possível consultar o CEP agora.</p><button type="button" class="link" (click)="focar('endereco')">Preencher endereço manualmente</button> }
+              @default {
+                @if (erro('cep')) { <p>{{ campo.erro }}</p> }
+                @else { <a class="link" href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noopener noreferrer">Não sei meu CEP</a> }
+              }
+            }
+          </div>
+        } @else if (erro(campo.nome)) { <p class="erro" [id]="'erro-' + campo.nome">{{ campo.erro }}</p> }
+      </div>
+    }
+  </div>
+  <div class="aviso" aria-live="polite">
+    @if (estadoCep() === 'encontrado') { <p class="sucesso"><span class="ms" aria-hidden="true">check</span>Endereço preenchido pelo CEP. Complete o número e confira o resto.</p> }
+    @if (estadoCep() === 'nao-encontrado') { <p class="erro">Confira o CEP digitado. <button class="link" type="button" (click)="focar('cep')">Corrigir CEP</button></p> }
+    @if (estadoCep() === 'fora-concessao') { <p class="erro">O NeoGuide só aceita projetos na área atendida pela Neoenergia. Confira o CEP da obra.</p> }
+  </div>
+  <fieldset>
+    <legend>Este projeto também tem…</legend>
+    <p>As opções marcadas são preenchidas na Etapa 5. Dá para mudar depois, na revisão.</p>
+    <div class="opcoes">
+      @for (opcao of opcoes; track opcao.nome) {
+        <label class="opcao" [for]="'projeto-' + opcao.nome">
+          <input type="checkbox" [id]="'projeto-' + opcao.nome" [formControlName]="opcao.nome" />
+          <span class="ms icone" aria-hidden="true">{{ opcao.icone }}</span>
+          <span class="opcao-texto"><strong>{{ opcao.label }}</strong><span class="chip"><span class="ms" aria-hidden="true">{{ form.controls[opcao.nome].value ? 'lock_open' : 'lock' }}</span>{{ form.controls[opcao.nome].value ? 'Entra na Etapa 5' : 'Não entra na Etapa 5' }}</span></span>
+        </label>
+      }
+    </div>
+  </fieldset>
+</form>

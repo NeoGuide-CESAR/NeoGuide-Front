@@ -1,0 +1,95 @@
+@if (etapa() !== 5 && tentadas().includes(etapa()) && errosDaEtapa.length) {
+  <p class="alerta" role="alert">{{ errosDaEtapa.length === 1 ? '1 campo precisa de atenção. Corrija para avançar.' : errosDaEtapa.length + ' campos precisam de atenção. Corrija para avançar.' }}</p>
+}
+@switch (etapa()) {
+  @case (1) {
+    <p class="intro">Agrupe as unidades que têm a mesma área. Ex.: 24 apartamentos de 65 m² formam um grupo.</p>
+    @for (g of valores().residencial.grupos; track $index; let i = $index) {
+      <fieldset class="linha"><legend>Grupo {{ i + 1 }}</legend>
+        <div class="campos">
+          <div><label [for]="'unidades-' + i">Quantidade de unidades *</label><input [id]="'unidades-' + i" type="number" min="1" step="1" [ngModel]="g.unidades" (ngModelChange)="grupo(i, 'unidades', $event)" [attr.aria-invalid]="!!mensagem('unidades-' + i)" [attr.aria-describedby]="'erro-unidades-' + i"><small class="erro" [id]="'erro-unidades-' + i">{{ mensagem('unidades-' + i) }}</small></div>
+          <div><label [for]="'area-grupo-' + i">Metragem de cada unidade (m²) *</label><input [id]="'area-grupo-' + i" type="number" min="0.01" step="any" [ngModel]="g.area" (ngModelChange)="grupo(i, 'area', $event)" [attr.aria-invalid]="!!mensagem('area-grupo-' + i)" [attr.aria-describedby]="'erro-area-grupo-' + i"><small class="erro" [id]="'erro-area-grupo-' + i">{{ mensagem('area-grupo-' + i) }}</small></div>
+          <button type="button" class="icone" [attr.aria-label]="'Remover grupo ' + (i + 1)" (click)="removerGrupo(i)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h18M9 6V4h6v2M5 6l1 14h12l1-14M10 10v6M14 10v6"/></svg></button>
+        </div>
+        <div class="studio"><label [for]="'smart-studio-' + i"><input [id]="'smart-studio-' + i" type="checkbox" [ngModel]="g.smartStudio" (ngModelChange)="smartStudio(i, $event)" [attr.aria-describedby]="'ajuda-studio-' + i"> Smart studio</label><p [id]="'ajuda-studio-' + i">Marque se as unidades deste grupo forem do tipo smart studio.</p></div>
+      </fieldset>
+    }
+    <button type="button" id="adicionar-grupo" class="adicionar" (click)="adicionarGrupo()"><span class="ms" aria-hidden="true">add_circle</span> ADICIONAR GRUPO</button>
+    <small class="erro">{{ mensagem('adicionar-grupo') }}</small>
+  }
+  @case (2) {
+    <p class="intro">Informe a quantidade de cada carga nas áreas de uso comum. Deixe vazio o que não existir.</p>
+    <div class="abas" role="tablist" aria-label="Tipos de carga">
+      @for (a of abas; track a.titulo; let i = $index) {
+        <button type="button" role="tab" [id]="'aba-' + i" [attr.aria-selected]="aba() === i" [tabIndex]="aba() === i ? 0 : -1" aria-controls="painel-cargas" (click)="selecionarAba(i)" (keydown.arrowRight)="selecionarAba((i + 1) % abas.length, true); $event.preventDefault()" (keydown.arrowLeft)="selecionarAba((i + abas.length - 1) % abas.length, true); $event.preventDefault()">{{ a.titulo }}<small>{{ abaPreenchida(i) ? 'Preenchida' : 'Sem cargas informadas' }}</small></button>
+      }
+    </div>
+    <div role="tabpanel" id="painel-cargas" [attr.aria-labelledby]="'aba-' + aba()" class="grade">
+      @for (f of abas[aba()].campos; track f.id) {
+        <div><label [for]="f.id">{{ f.nome }}</label><input [id]="f.id" type="number" min="0" step="1" placeholder="0" [ngModel]="valores().cargas[f.id]" (ngModelChange)="carga(f.id, $event)" [attr.aria-invalid]="!!mensagem(f.id)" [attr.aria-describedby]="'erro-' + f.id"><small class="erro" [id]="'erro-' + f.id">{{ mensagem(f.id) }}</small></div>
+      }
+    </div>
+    <div class="proxima-aba"><span>Aba {{ aba() + 1 }} de {{ abas.length }}</span>@if (aba() < abas.length - 1) { <button type="button" (click)="proximaAba()">Próxima aba: {{ abas[aba() + 1].titulo }} <span class="ms" aria-hidden="true">arrow_forward</span></button> }</div>
+  }
+  @case (3) {
+    <p class="intro">Para cada espaço comercial do prédio, informe a finalidade e a área. Se não houver, avance sem preencher.</p>
+    @for (e of valores().comercial; track $index; let i = $index) {
+      <fieldset class="linha"><legend>Espaço {{ i + 1 }}</legend><div class="campos">
+        <div><label [for]="'finalidade-' + i">Finalidade *</label><input [id]="'finalidade-' + i" type="text" placeholder="Ex.: loja, escritório" [ngModel]="e.finalidade" (ngModelChange)="finalidade(i, $event)" [attr.aria-invalid]="!!mensagem('finalidade-' + i)" [attr.aria-describedby]="'erro-finalidade-' + i"><small class="erro" [id]="'erro-finalidade-' + i">{{ mensagem('finalidade-' + i) }}</small></div>
+        <div><label [for]="'area-espaco-' + i">Área do espaço (m²) *</label><input [id]="'area-espaco-' + i" type="number" min="0.01" step="any" [ngModel]="e.area" (ngModelChange)="areaEspaco(i, $event)" [attr.aria-invalid]="!!mensagem('area-espaco-' + i)" [attr.aria-describedby]="'erro-area-espaco-' + i"><small class="erro" [id]="'erro-area-espaco-' + i">{{ mensagem('area-espaco-' + i) }}</small></div>
+        <button type="button" class="icone" [attr.aria-label]="'Remover espaço ' + (i + 1)" (click)="removerEspaco(i)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h18M9 6V4h6v2M5 6l1 14h12l1-14M10 10v6M14 10v6"/></svg></button>
+      </div></fieldset>
+    }
+    @if (!valores().comercial.length) { <p class="vazio">Nenhum espaço comercial adicionado.</p> }
+    <button type="button" class="adicionar" (click)="adicionarEspaco()"><span class="ms" aria-hidden="true">add_circle</span> ADICIONAR ESPAÇO</button>
+  }
+  @case (4) {
+    <p class="intro">Preencha as partes que você marcou na criação do projeto.</p>
+    @if (dados().temVe) {
+      <section class="especial"><h3><span class="ms" aria-hidden="true">ev_station</span>Pontos de carregamento de veículo elétrico</h3><div class="grade">
+        <div><label for="pontos">Quantidade de pontos de carregamento *</label><input id="pontos" type="number" min="1" step="1" [ngModel]="valores().especiais.pontos" (ngModelChange)="especial('pontos', $event)" [attr.aria-invalid]="!!mensagem('pontos')" aria-describedby="ajuda-pontos erro-pontos"><small id="ajuda-pontos">Número inteiro, a partir de 1.</small><small class="erro" id="erro-pontos">{{ mensagem('pontos') }}</small></div>
+      </div></section>
+    }
+    @if (dados().temBomba) {
+      <section class="especial"><h3><span class="ms" aria-hidden="true">local_fire_department</span>Motobomba de incêndio em situação de emergência <span class="selo">1ª VERSÃO</span></h3>
+        <p class="aviso">Parte preliminar: os campos necessários ainda serão validados na documentação.</p>
+        <div class="grade">
+          <div><label for="bombas">Quantidade de motobombas *</label><input id="bombas" type="number" min="1" step="1" [ngModel]="valores().especiais.bombas" (ngModelChange)="especial('bombas', $event)" [attr.aria-invalid]="!!mensagem('bombas')" aria-describedby="erro-bombas"><small class="erro" id="erro-bombas">{{ mensagem('bombas') }}</small></div>
+          <div><label for="potenciaCv">Potência de cada motobomba (cv) *</label><input id="potenciaCv" type="number" min="0.01" step="any" [ngModel]="valores().especiais.potenciaCv" (ngModelChange)="especial('potenciaCv', $event)" [attr.aria-invalid]="!!mensagem('potenciaCv')" aria-describedby="erro-potenciaCv"><small class="erro" id="erro-potenciaCv">{{ mensagem('potenciaCv') }}</small></div>
+        </div>
+      </section>
+    }
+  }
+  @case (5) {
+    <p class="intro">Tudo o que você preencheu, por etapa. Use EDITAR para corrigir os dados antes de calcular.</p>
+    @if (totalErros) { <p class="alerta" role="alert">{{ totalErros === 1 ? 'Corrija 1 erro para calcular.' : 'Corrija ' + totalErros + ' erros para calcular.' }} As etapas com pendências estão indicadas abaixo.</p> }
+    <article class="revisao"><header><h3>1. Projeto</h3><button type="button" (click)="editar.emit(0)">EDITAR<span class="sr-only"> projeto</span></button></header>
+      @if (!projetoValido()) { <p class="erro">Confira os campos obrigatórios do projeto.</p> }
+      <dl><dt>Nome</dt><dd>{{ dados().nome }}</dd><dt>Endereço</dt><dd>{{ dados().endereco }} · {{ dados().bairro }} · {{ dados().municipio }}/{{ dados().uf }} · CEP {{ mascaraCep(dados().cep) }}</dd><dt>Tipo</dt><dd>{{ dados().tipoEdificacao }}</dd><dt>Carregamento de VE</dt><dd>{{ dados().temVe ? 'Sim' : 'Não' }}</dd><dt>Bomba de incêndio</dt><dd>{{ dados().temBomba ? 'Sim' : 'Não' }}</dd></dl>
+    </article>
+    <article class="revisao"><header><h3>2. Residencial</h3>@if (dados().tipoEdificacao !== 'Comercial') { <button type="button" (click)="editar.emit(1)">EDITAR<span class="sr-only"> residencial</span></button> }</header>
+      @if (dados().tipoEdificacao === 'Comercial') { <p>Não se aplica ao tipo de edificação.</p> } @else {
+        @if (errosNaEtapa(1)) { <p class="erro">{{ errosNaEtapa(1) }} campo(s) precisam de atenção.</p> }
+        <div class="tabela"><table><thead><tr><th>Grupo</th><th>Unidades</th><th>Área de cada</th><th>Smart studio</th></tr></thead><tbody>@for (g of valores().residencial.grupos; track $index) { <tr><td>{{ $index + 1 }}</td><td>{{ g.unidades ?? 'Não informado' }}</td><td>{{ g.area == null ? 'Não informada' : g.area + ' m²' }}</td><td>{{ g.smartStudio ? 'Sim' : 'Não' }}</td></tr> }</tbody></table></div>
+      }
+    </article>
+    <article class="revisao"><header><h3>3. Área comum</h3><button type="button" (click)="editar.emit(2)">EDITAR<span class="sr-only"> área comum</span></button></header>
+      @if (errosNaEtapa(2)) { <p class="erro">{{ errosNaEtapa(2) }} campo(s) precisam de atenção.</p> }
+      <dl>@for (f of cargasInformadas(); track f.nome) { <dt>{{ f.nome }}</dt><dd>{{ f.valor }}</dd> }</dl>@if (!cargasInformadas().length) { <p>Nenhuma carga informada. Campos vazios equivalem a zero.</p> }
+    </article>
+    <article class="revisao"><header><h3>4. Comercial</h3>@if (dados().tipoEdificacao !== 'Residencial multifamiliar') { <button type="button" (click)="editar.emit(3)">EDITAR<span class="sr-only"> comercial</span></button> }</header>
+      @if (dados().tipoEdificacao === 'Residencial multifamiliar') { <p>Não se aplica ao tipo de edificação.</p> } @else {
+        @if (errosNaEtapa(3)) { <p class="erro">{{ errosNaEtapa(3) }} campo(s) precisam de atenção.</p> }
+        @for (e of valores().comercial; track $index) { <p>{{ e.finalidade || 'Finalidade não informada' }} · {{ e.area == null ? 'Área não informada' : e.area + ' m²' }}</p> } @empty { <p>Nenhum espaço comercial informado.</p> }
+      }
+    </article>
+    <article class="revisao"><header><h3>5. VE e bomba de incêndio</h3>@if (dados().temVe || dados().temBomba) { <button type="button" (click)="editar.emit(4)">EDITAR<span class="sr-only"> VE e bomba</span></button> }</header>
+      @if (errosNaEtapa(4)) { <p class="erro">{{ errosNaEtapa(4) }} campo(s) precisam de atenção.</p> }
+      @if (dados().temVe) { <p>Pontos de carregamento: {{ valores().especiais.pontos ?? 'Não informado' }}</p> }
+      @if (dados().temBomba) { <p>Motobombas: {{ valores().especiais.bombas ?? 'Não informado' }} · Potência de cada: {{ valores().especiais.potenciaCv ?? 'Não informada' }} cv</p><small>Campos da bomba de incêndio em versão preliminar.</small> }
+      @if (!dados().temVe && !dados().temBomba) { <p>Não selecionados neste projeto.</p> }
+    </article>
+    @if (!totalErros) { <p class="pronto"><span class="ms" aria-hidden="true">check_circle</span>Tudo certo para calcular.</p> }
+    <p class="aviso">Os dados ficam salvos neste navegador. O cálculo de demanda ainda não está disponível.</p>
+  }
+}

@@ -64,7 +64,7 @@ export class HomePage {
   readonly atalhos = computed<Atalho[]>(() => {
     const rascunho = this.projetos.rascunhoEmAndamento();
     return [
-      { icone: 'add_circle', titulo: 'Novo projeto', texto: 'Comece o cálculo de demanda de uma nova edificação.', href: '#', destaque: true },
+      { icone: 'add_circle', titulo: 'Novo projeto', texto: 'Comece o cálculo de demanda de uma nova edificação.', rota: '/projetos/novo/calculo', destaque: true },
       {
         icone: 'bolt',
         titulo: 'Continuar cálculo',
