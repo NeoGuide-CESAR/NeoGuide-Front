@@ -1,0 +1,11 @@
+<app-site-header [links]="links" />
+
+<app-projetos-lista
+  [projetos]="projetos()"
+  (novoProjeto)="novoProjeto()"
+  (abrirProjeto)="abrirProjeto($event)"
+  (duplicarProjeto)="duplicarProjeto($event)"
+  (excluirProjeto)="excluirProjeto($event)"
+/>
+
+<app-site-footer />

@@ -71,7 +71,7 @@ export class CalculoDemandaPage {
 
   readonly links: LinkNav[] = [
     { rotulo: 'Início', rota: '/inicio' },
-    { rotulo: 'Meus Projetos', href: '#' },
+    { rotulo: 'Meus Projetos', rota: '/meus-projetos' },
     { rotulo: 'Cálculo de Demanda', href: '#', submenu: true },
     { rotulo: 'Documentos', href: '#' },
   ];

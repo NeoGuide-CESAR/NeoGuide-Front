@@ -7,6 +7,11 @@ export interface Projeto {
   status: StatusProjeto;
   etapaAtual?: number;
   totalEtapas?: number;
+  tipoEdificacao?: string;
+  endereco?: string;
+  unidadesConsumidoras?: number;
+  criadoEm?: string; // ISO 8601
+  proximaEtapa?: string;
 }
 
 export interface ResumoProjetos {

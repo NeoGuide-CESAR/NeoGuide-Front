@@ -115,7 +115,7 @@ describe('Fluxo completo e persistência', () => {
     const f = TestBed.createComponent(WizardBodyComponent); f.detectChanges(); const c = f.componentInstance;
     c.formulario!.preencherExemplo(); const dados = complementosVazios();
     dados.residencial.grupos = [{ unidades: 24, area: 65, smartStudio: false }]; dados.especiais = { pontos: 4, bombas: 1, potenciaCv: 10 };
-    c.receberComplementos(dados); c.irParaEtapa(5); f.detectChanges();
+    c.receberComplementos(dados); c.etapasVisitadas.set([0, 1, 2, 4]); c.irParaEtapa(5); f.detectChanges();
     c.avancarEtapa(); expect(c.revisaoConcluida()).toBeFalse();
     c.rascunhoAlterado.subscribe(() => c.confirmarPersistencia(true)); c.avancarEtapa();
     expect(c.revisaoConcluida()).toBeTrue(); f.destroy();
