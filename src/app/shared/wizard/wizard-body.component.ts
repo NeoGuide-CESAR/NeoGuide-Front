@@ -80,8 +80,15 @@ export class WizardBodyComponent {
   completa(indice: number): boolean {
     return indice === 0 ? this.formularioValido() : this.etapasVisitadas().includes(indice) && !this.errosComplementares().some(e => e.etapa === indice);
   }
+  /** Além de aplicável ao tipo/opções marcadas, só libera a etapa se todas as etapas aplicáveis anteriores já estiverem completas. */
   etapaLiberada(indice: number): boolean {
-    return indice >= 0 && indice < this.etapas().length && (etapasAplicaveis(this.dadosAtuais(), this.formularioValido())[indice] ?? false);
+    if (indice < 0 || indice >= this.etapas().length) return false;
+    const aplicaveis = etapasAplicaveis(this.dadosAtuais(), this.formularioValido());
+    if (!(aplicaveis[indice] ?? false)) return false;
+    for (let i = 0; i < indice; i++) {
+      if (aplicaveis[i] && !this.completa(i)) return false;
+    }
+    return true;
   }
   estadoEtapa(indice: number): EstadoEtapa {
     if (indice === this.etapaAtual()) return 'atual';

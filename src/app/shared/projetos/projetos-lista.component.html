@@ -1,0 +1,189 @@
+<main class="corpo">
+  <nav aria-label="Breadcrumb" class="breadcrumb">
+    @for (item of breadcrumb(); track item.rotulo; let last = $last) {
+      @if (item.rota && !last) {
+        <a class="breadcrumb-link" [routerLink]="item.rota">{{ item.rotulo }}</a>
+        <span class="breadcrumb-separador" aria-hidden="true">/</span>
+      } @else {
+        <span class="breadcrumb-atual" [attr.aria-current]="last ? 'page' : null">{{ item.rotulo }}</span>
+      }
+    }
+  </nav>
+
+  <div class="cabecalho">
+    <div class="cabecalho__texto">
+      <h1>Meus Projetos</h1>
+      <p>Visualize e gerencie os projetos da sua carteira e acompanhe o andamento de cada um.</p>
+    </div>
+    <button type="button" class="ng-btn ng-btn--destaque botao-novo" (click)="novoProjeto.emit()">
+      <span class="ms" aria-hidden="true">add</span> Novo projeto
+    </button>
+  </div>
+
+  <div class="filtros">
+    <div class="busca">
+      <label for="busca-projetos" class="sr-only">Buscar por nome ou endereço</label>
+      <span class="ms busca__icone" aria-hidden="true">search</span>
+      <input
+        id="busca-projetos"
+        type="search"
+        placeholder="Buscar por nome ou endereço"
+        [value]="busca()"
+        (input)="buscar($event)"
+      />
+    </div>
+
+    <ul class="chips" role="list">
+      <li>
+        <button
+          type="button"
+          class="chip"
+          [class.chip--ativo]="filtro() === 'todos'"
+          [attr.aria-pressed]="filtro() === 'todos'"
+          (click)="selecionarFiltro('todos')"
+        >
+          @if (filtro() === 'todos') { <span class="ms" aria-hidden="true">check</span> }
+          Todos {{ contagens().todos }}
+        </button>
+      </li>
+      @for (s of statusFiltraveis; track s) {
+        <li>
+          <button
+            type="button"
+            class="chip"
+            [class.chip--ativo]="filtro() === s"
+            [attr.aria-pressed]="filtro() === s"
+            (click)="selecionarFiltro(s)"
+          >
+            @if (filtro() === s) { <span class="ms" aria-hidden="true">check</span> }
+            {{ statusInfo[s].rotulo }} {{ contagens()[s] }}
+          </button>
+        </li>
+      }
+    </ul>
+
+    <div class="ordenacao">
+      <label for="ordenar-por">Ordenar por</label>
+      <select id="ordenar-por" [value]="ordenacao()" (change)="mudarOrdenacao($event)">
+        @for (o of ordens; track o.valor) {
+          <option [value]="o.valor">{{ o.rotulo }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (paginados().length) {
+    <ul class="lista">
+      @for (p of paginados(); track p.id) {
+        <li class="item ng-card" [class.item--expandido]="expandidoId() === p.id">
+          <button
+            type="button"
+            class="item__cabecalho"
+            [attr.aria-expanded]="expandidoId() === p.id"
+            [attr.aria-controls]="'painel-' + p.id"
+            (click)="alternarExpandido(p.id)"
+          >
+            <span class="item__nome">{{ p.nome }}</span>
+            <span class="item__meta">
+              <span class="item__data">Atualizado em {{ p.atualizadoEm | date: 'dd/MM/yyyy' }}</span>
+              <span class="status" [attr.data-status]="p.status">
+                <span class="ms" aria-hidden="true">{{ statusInfo[p.status].icone }}</span>
+                {{ statusInfo[p.status].rotulo }}
+              </span>
+              <span class="ms item__chevron" aria-hidden="true">expand_more</span>
+            </span>
+          </button>
+
+          @if (expandidoId() === p.id) {
+            <div class="item__painel" [id]="'painel-' + p.id">
+              <h2 class="painel__titulo">Informações do projeto</h2>
+              <dl class="painel__grade">
+                <div><dt>Tipo de edificação</dt><dd>{{ p.tipoEdificacao || '—' }}</dd></div>
+                <div><dt>Endereço</dt><dd>{{ p.endereco || '—' }}</dd></div>
+                <div><dt>Unidades consumidoras</dt><dd>{{ p.unidadesConsumidoras ?? '—' }}</dd></div>
+                <div><dt>Criado em</dt><dd>{{ p.criadoEm ? (p.criadoEm | date: 'dd/MM/yyyy') : '—' }}</dd></div>
+              </dl>
+              @if (p.proximaEtapa) {
+                <p class="painel__proxima"><strong>Próxima etapa:</strong> {{ p.proximaEtapa }}</p>
+              }
+
+              <div class="painel__acoes">
+                <button type="button" class="ng-btn ng-btn--primario" (click)="abrirProjeto.emit(p.id)">
+                  <span class="ms" aria-hidden="true">arrow_forward</span> Abrir projeto
+                </button>
+                <button type="button" class="ng-btn ng-btn--contorno" (click)="duplicarProjeto.emit(p.id)">
+                  <span class="ms" aria-hidden="true">content_copy</span> Duplicar
+                </button>
+                <button type="button" class="acao-excluir" (click)="pedirExclusao($event, p)">
+                  <span class="ms" aria-hidden="true">delete</span> Excluir
+                </button>
+              </div>
+            </div>
+          }
+        </li>
+      }
+    </ul>
+
+    <nav class="paginacao" aria-label="Paginação">
+      <div class="paginacao__tamanho">
+        <label for="itens-por-pagina">Linhas por página</label>
+        <select id="itens-por-pagina" [value]="tamanhoPagina()" (change)="mudarTamanhoPagina($event)">
+          @for (n of opcoesTamanhoPagina(); track n) {
+            <option [value]="n">{{ n }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="paginacao__paginas">
+        <span class="paginacao__intervalo">{{ intervaloExibido().inicio }} – {{ intervaloExibido().fim }} de {{ intervaloExibido().total }}</span>
+        <button
+          type="button"
+          class="ng-icon-btn"
+          [disabled]="paginaExibida() === 1"
+          (click)="irParaPagina(paginaExibida() - 1)"
+          aria-label="Página anterior"
+        >
+          <span class="ms" aria-hidden="true">chevron_left</span>
+        </button>
+        @for (n of paginasVisiveis(); track n) {
+          <button
+            type="button"
+            class="pagina"
+            [class.pagina--ativa]="n === paginaExibida()"
+            [attr.aria-current]="n === paginaExibida() ? 'page' : null"
+            (click)="irParaPagina(n)"
+          >
+            {{ n }}
+          </button>
+        }
+        <button
+          type="button"
+          class="ng-icon-btn"
+          [disabled]="paginaExibida() === totalPaginas()"
+          (click)="irParaPagina(paginaExibida() + 1)"
+          aria-label="Próxima página"
+        >
+          <span class="ms" aria-hidden="true">chevron_right</span>
+        </button>
+      </div>
+    </nav>
+  } @else {
+    <div class="vazio">
+      <p>Nenhum projeto encontrado com esses filtros.</p>
+      <button type="button" class="link-limpar" (click)="limparFiltros()">Limpar filtros</button>
+    </div>
+  }
+</main>
+
+@if (paraExcluir(); as projeto) {
+  <div class="modal-fundo" (click)="cancelarExclusao()">
+    <div class="modal ng-card" role="alertdialog" aria-modal="true" aria-labelledby="titulo-exclusao" (click)="$event.stopPropagation()">
+      <h2 id="titulo-exclusao">Excluir projeto?</h2>
+      <p>Tem certeza que deseja excluir <strong>{{ projeto.nome }}</strong>? Esta ação não pode ser desfeita.</p>
+      <div class="modal__acoes">
+        <button type="button" class="ng-btn ng-btn--contorno" (click)="cancelarExclusao()">Cancelar</button>
+        <button type="button" class="ng-btn botao-confirmar-exclusao" (click)="confirmarExclusao()">Excluir</button>
+      </div>
+    </div>
+  </div>
+}
