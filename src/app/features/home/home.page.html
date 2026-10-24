@@ -16,7 +16,7 @@
     @if (menuAberto()) {
       <ul id="menu-usuario" class="usuario__menu" role="menu">
         <li role="none">
-          <a role="menuitem" href="#"><span class="ms" aria-hidden="true">person</span>Meu perfil</a>
+          <a role="menuitem" routerLink="/perfil"><span class="ms" aria-hidden="true">person</span>Meu perfil</a>
         </li>
         <li role="none">
           <button role="menuitem" type="button" (click)="sair()">

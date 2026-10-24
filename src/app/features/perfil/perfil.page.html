@@ -1,0 +1,49 @@
+<app-site-header [links]="links"><a class="conta" routerLink="/perfil" aria-current="page"><span class="ms" aria-hidden="true">account_circle</span>{{ auth.usuario()?.nome }}<span class="ms" aria-hidden="true">expand_more</span></a></app-site-header>
+<main class="ng-container">
+  <nav class="breadcrumb" aria-label="Breadcrumb"><a routerLink="/inicio">Início</a><span aria-hidden="true">›</span><span aria-current="page">Meu perfil</span></nav>
+  <h1 class="ng-titulo-secao">Meu perfil</h1>
+  <div class="layout">
+    <aside class="ng-card identidade" aria-label="Sua conta">
+      <div class="avatar" aria-hidden="true">{{ iniciais() }}</div>
+      <h2>{{ perfil()?.name || auth.usuario()?.nome }}</h2>
+      <span class="papel"><span class="ms" aria-hidden="true">engineering</span>{{ auth.usuario()?.perfil === 'analista' ? 'Analista' : 'Projetista' }}</span>
+      <p class="email">{{ perfil()?.email || auth.usuario()?.email }}</p>
+      <button type="button" class="sair" (click)="sair()" [disabled]="salvando()"><span class="ms" aria-hidden="true">logout</span>Sair da conta</button>
+    </aside>
+    <div class="editor" [attr.aria-busy]="carregando() || salvando()">
+      @if (carregando()) { <p class="estado" role="status">Carregando seu perfil…</p> }
+      @if (erroGeral()) { <div class="alerta" role="alert"><p>{{ erroGeral() }}</p>@if (!perfil() && !carregando()) { <button type="button" class="ng-btn ng-btn--contorno" (click)="carregar()">TENTAR NOVAMENTE</button> }</div> }
+      @if (sucesso()) { <p class="sucesso" role="status">{{ sucesso() }}</p> }
+      @if (perfil()) {
+        <form [formGroup]="form" (ngSubmit)="salvar()" novalidate>
+          <section class="ng-card bloco" aria-labelledby="titulo-dados"><h2 id="titulo-dados">Meus dados</h2>
+            <div class="grade">
+              @for (campo of camposDados; track campo.id) {
+                <div class="campo" [class.largo]="campo.id === 'nome' || campo.id === 'email'">
+                  <label [for]="'perfil-' + campo.id">{{ campo.rotulo }}</label>
+                  <input [id]="'perfil-' + campo.id" [formControlName]="campo.id" [type]="campo.id === 'email' ? 'email' : 'text'" [attr.autocomplete]="campo.autocomplete" [attr.maxlength]="campo.max" [attr.aria-invalid]="!!mensagem(campo.id)" [attr.aria-describedby]="campo.id === 'email' ? 'ajuda-email' : mensagem(campo.id) ? 'erro-' + campo.id : null">
+                  @if (mensagem(campo.id)) { <p class="erro" [id]="'erro-' + campo.id">{{ mensagem(campo.id) }}</p> }
+                </div>
+              }
+            </div><p class="ajuda" id="ajuda-email">O e-mail é usado para entrar na conta e não pode ser alterado por aqui.</p>
+          </section>
+          <section class="ng-card bloco" aria-labelledby="titulo-senha"><h2 id="titulo-senha">Alterar senha</h2>
+            <p class="ajuda senha-ajuda" id="ajuda-senha">Deixe os campos vazios para manter sua senha. A nova senha deve ter de 8 a 64 caracteres, com ao menos uma letra e um número.</p>
+            <div class="grade senhas">
+              @for (campo of camposSenha; track campo.id) {
+                <div class="campo"><label [for]="'perfil-' + campo.id">{{ campo.rotulo }}</label>
+                  <div class="senha"><input [id]="'perfil-' + campo.id" [formControlName]="campo.id" [type]="visiveis().includes(campo.id) ? 'text' : 'password'" [attr.autocomplete]="campo.autocomplete" [attr.aria-invalid]="!!mensagem(campo.id)" [attr.aria-describedby]="mensagem(campo.id) ? 'erro-' + campo.id : 'ajuda-senha'">
+                    <button type="button" class="olho" [attr.aria-label]="(visiveis().includes(campo.id) ? 'Ocultar ' : 'Mostrar ') + campo.rotulo.toLowerCase()" [attr.aria-pressed]="visiveis().includes(campo.id)" [disabled]="salvando()" (click)="alternarSenha(campo.id)"><span class="ms" aria-hidden="true">{{ visiveis().includes(campo.id) ? 'visibility' : 'visibility_off' }}</span></button>
+                  </div>
+                  @if (mensagem(campo.id)) { <p class="erro" [id]="'erro-' + campo.id">{{ mensagem(campo.id) }}</p> }
+                </div>
+              }
+            </div>
+          </section>
+          <div class="acoes"><button type="button" class="ng-btn ng-btn--contorno" [disabled]="salvando()" (click)="cancelar()">CANCELAR</button><button type="submit" class="ng-btn ng-btn--primario" [disabled]="salvando() || carregando()">{{ salvando() ? 'SALVANDO…' : 'SALVAR ALTERAÇÕES' }}</button></div>
+        </form>
+      }
+    </div>
+  </div>
+</main>
+<app-site-footer />

@@ -22,6 +22,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/home/home.page').then((m) => m.HomePage),
   },
   {
+    path: 'perfil',
+    title: 'Meu perfil · NeoGuide',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/perfil/perfil.page').then(m => m.PerfilPage),
+  },
+  {
     path: 'meus-projetos',
     title: 'Meus Projetos · NeoGuide',
     canActivate: [authGuard],

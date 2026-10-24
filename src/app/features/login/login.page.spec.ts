@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { LoginPage } from './login.page';
 
 describe('Página pública do NeoGuide', () => {
@@ -13,7 +15,7 @@ describe('Página pública do NeoGuide', () => {
   };
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [LoginPage], providers: [provideRouter([])] }).compileComponents();
+    await TestBed.configureTestingModule({ imports: [LoginPage], providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()] }).compileComponents();
     fixture = TestBed.createComponent(LoginPage);
     fixture.detectChanges();
     root = fixture.nativeElement;
