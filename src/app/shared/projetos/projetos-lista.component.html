@@ -20,6 +20,7 @@
     </button>
   </div>
 
+  @if (projetos().length) {
   <div class="filtros">
     <div class="busca">
       <label for="busca-projetos" class="sr-only">Buscar por nome ou endereço</label>
@@ -43,7 +44,7 @@
           (click)="selecionarFiltro('todos')"
         >
           @if (filtro() === 'todos') { <span class="ms" aria-hidden="true">check</span> }
-          Todos {{ contagens().todos }}
+          Todos · {{ contagens().todos }}
         </button>
       </li>
       @for (s of statusFiltraveis; track s) {
@@ -56,7 +57,7 @@
             (click)="selecionarFiltro(s)"
           >
             @if (filtro() === s) { <span class="ms" aria-hidden="true">check</span> }
-            {{ statusInfo[s].rotulo }} {{ contagens()[s] }}
+            {{ statusInfo[s].rotulo }} · {{ contagens()[s] }}
           </button>
         </li>
       }
@@ -71,6 +72,7 @@
       </select>
     </div>
   </div>
+  }
 
   @if (paginados().length) {
     <ul class="lista">
@@ -167,11 +169,24 @@
         </button>
       </div>
     </nav>
+  } @else if (!projetos().length) {
+    <!-- Estado C: carteira sem projetos -->
+    <section class="vazio vazio--bloco" aria-labelledby="titulo-vazio">
+      <span class="vazio__icone" aria-hidden="true"><span class="ms">apartment</span></span>
+      <h2 id="titulo-vazio" class="vazio__titulo">Você ainda não tem projetos</h2>
+      <p class="vazio__texto">Crie o primeiro para calcular a demanda da edificação e gerar o memorial técnico.</p>
+      <button type="button" class="ng-btn ng-btn--primario" (click)="novoProjeto.emit()">
+        <span class="ms" aria-hidden="true">add_circle</span> CRIAR PRIMEIRO PROJETO
+      </button>
+    </section>
   } @else {
-    <div class="vazio">
-      <p>Nenhum projeto encontrado com esses filtros.</p>
+    <!-- Estado D: filtro ou busca sem resultado -->
+    <section class="vazio vazio--linha" aria-labelledby="titulo-vazio">
+      <span class="ms vazio__lupa" aria-hidden="true">search</span>
+      <h2 id="titulo-vazio" class="vazio__titulo">{{ tituloFiltroVazio() }}</h2>
+      <p class="vazio__texto">Tente outro status ou limpe os filtros.</p>
       <button type="button" class="link-limpar" (click)="limparFiltros()">Limpar filtros</button>
-    </div>
+    </section>
   }
 </main>
 

@@ -13,6 +13,14 @@ type Ordenacao = 'recentes' | 'antigos' | 'az' | 'za';
 
 const STATUS_FILTRAVEIS: StatusProjeto[] = ['rascunho', 'em_analise', 'aprovado', 'reprovado'];
 
+/** Complemento usado no título do estado vazio: "Nenhum projeto reprovado", "Nenhum projeto em análise". */
+const COMPLEMENTO_STATUS: Record<StatusProjeto, string> = {
+  rascunho: 'em rascunho',
+  em_analise: 'em análise',
+  aprovado: 'aprovado',
+  reprovado: 'reprovado',
+};
+
 const OPCOES_ORDENACAO: { valor: Ordenacao; rotulo: string }[] = [
   { valor: 'recentes', rotulo: 'Mais recentes' },
   { valor: 'antigos', rotulo: 'Mais antigos' },
@@ -93,6 +101,12 @@ export class ProjetosListaComponent {
       default:
         return lista.sort((a, b) => b.atualizadoEm.localeCompare(a.atualizadoEm));
     }
+  });
+
+  /** Título do estado vazio de filtro (estado D): usa o nome do status selecionado. */
+  readonly tituloFiltroVazio = computed(() => {
+    const filtro = this.filtro();
+    return filtro === 'todos' ? 'Nenhum projeto encontrado' : `Nenhum projeto ${COMPLEMENTO_STATUS[filtro]}`;
   });
 
   readonly totalPaginas = computed(() => Math.max(1, Math.ceil(this.ordenados().length / this.tamanhoPagina())));

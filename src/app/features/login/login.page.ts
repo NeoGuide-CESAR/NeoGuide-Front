@@ -24,6 +24,8 @@ export class LoginPage implements AfterViewInit {
   private readonly chatBody = viewChild.required<ElementRef<HTMLElement>>('chatBody');
   private readonly chatFab = viewChild.required<ElementRef<HTMLButtonElement>>('chatFab');
   readonly entrar = input<string | undefined>();
+  /** Rota a abrir depois do login, vinda de ?returnUrl= (ex.: sessão expirada). */
+  readonly returnUrl = input<string>();
   readonly chatAberto = signal(false);
   readonly conteudo = signal<Conteudo>({ titulo: '', texto: '' });
   readonly mensagens = signal([{ autor: 'bot', texto: 'Olá! Sou o Neo. Posso tirar dúvidas sobre a norma DIS-NOR-053. Como posso ajudar?' }]);

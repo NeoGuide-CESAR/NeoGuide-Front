@@ -7,7 +7,7 @@
 >
   <div class="janela__corpo">
     <div class="janela__topo">
-      <h2 id="titulo-login" class="ng-titulo-secao">Login</h2>
+      <h2 id="titulo-login" class="titulo">Entrar na plataforma</h2>
       <button type="button" class="ng-icon-btn" aria-label="Fechar" (click)="fechar()">
         <span class="ms" aria-hidden="true">close</span>
       </button>
@@ -21,15 +21,15 @@
     <p>Informe seu CPF/CNPJ ou e-mail e a senha:</p>
 
     <form [formGroup]="form" (ngSubmit)="entrar()" novalidate class="form">
-      @if (erroServidor(); as erro) {
+      @if (erroCredenciais()) {
         <div class="alerta" role="alert">
           <span class="ms" aria-hidden="true">error</span>
-          <span>{{ erro }}</span>
+          <span><strong>CPF/CNPJ ou senha incorretos.</strong> {{ textoErroCredenciais }}</span>
         </div>
       }
 
       <!-- CPF/CNPJ ou e-mail -->
-      <div class="campo" [class.campo--erro]="mensagemDocumento()">
+      <div class="campo" [class.campo--erro]="mensagemDocumento() || erroCredenciais()">
         <label for="documento" class="campo__rotulo">CPF/CNPJ ou e-mail</label>
         <div class="campo__caixa">
           <input
@@ -40,7 +40,7 @@
             autocomplete="username"
             inputmode="email"
             spellcheck="false"
-            [attr.aria-invalid]="!!mensagemDocumento()"
+            [attr.aria-invalid]="!!mensagemDocumento() || erroCredenciais()"
             [attr.aria-describedby]="mensagemDocumento() ? 'erro-documento' : null"
           />
         </div>
@@ -52,15 +52,16 @@
       </div>
 
       <!-- Senha -->
-      <div class="campo" [class.campo--erro]="mensagemSenha()">
+      <div class="campo" [class.campo--erro]="mensagemSenha() || erroCredenciais()">
         <label for="senha" class="campo__rotulo">Senha</label>
         <div class="campo__caixa">
           <input
+            #campoSenha
             id="senha"
             [type]="mostrarSenha() ? 'text' : 'password'"
             formControlName="senha"
             autocomplete="current-password"
-            [attr.aria-invalid]="!!mensagemSenha()"
+            [attr.aria-invalid]="!!mensagemSenha() || erroCredenciais()"
             [attr.aria-describedby]="mensagemSenha() ? 'erro-senha' : null"
           />
           <button
@@ -80,7 +81,7 @@
         }
       </div>
 
-      <div class="esqueci"><a href="#">Esqueceu sua senha?</a></div>
+      <div class="esqueci"><a href="#" class="esqueci__link">Esqueci minha senha</a></div>
 
       <button type="submit" class="ng-btn ng-btn--primario entrar" [disabled]="enviando()">
         @if (enviando()) {
