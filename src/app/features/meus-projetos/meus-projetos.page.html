@@ -1,11 +1,225 @@
 <app-site-header [links]="links" />
 
-<app-projetos-lista
-  [projetos]="projetos()"
-  (novoProjeto)="novoProjeto()"
-  (abrirProjeto)="abrirProjeto($event)"
-  (duplicarProjeto)="duplicarProjeto($event)"
-  (excluirProjeto)="excluirProjeto($event)"
-/>
+<main class="corpo">
+  <nav aria-label="Breadcrumb" class="breadcrumb">
+    <a routerLink="/inicio" class="breadcrumb__link">Início</a>
+    <span class="breadcrumb__sep" aria-hidden="true">&gt;</span>
+    <span aria-current="page">Meus Projetos</span>
+  </nav>
+
+  <header class="cabecalho">
+    <div class="cabecalho__texto">
+      <h1>Meus Projetos</h1>
+      <p>Veja abaixo seus projetos de entrada de serviço e o andamento de cada um.</p>
+    </div>
+    <button type="button" class="ng-btn ng-btn--primario botao-novo" (click)="novoProjeto()">
+      <span class="ms" aria-hidden="true">add_circle</span> NOVO PROJETO
+    </button>
+  </header>
+
+  @if (resultado(); as r) {
+    @if (r.totalGeral === 0) {
+      <!-- Estado C: carteira sem nenhum projeto -->
+      <section class="vazio vazio--bloco" aria-labelledby="titulo-vazio">
+        <span class="vazio__icone" aria-hidden="true"><span class="ms">apartment</span></span>
+        <h2 id="titulo-vazio" class="vazio__titulo">Você ainda não tem projetos</h2>
+        <p class="vazio__texto">Crie o primeiro para calcular a demanda da edificação e gerar o memorial técnico.</p>
+        <button type="button" class="ng-btn ng-btn--primario" (click)="novoProjeto()">
+          <span class="ms" aria-hidden="true">add_circle</span> CRIAR PRIMEIRO PROJETO
+        </button>
+      </section>
+    } @else {
+      <div class="controles">
+        <div class="busca">
+          <label for="busca-projetos" class="sr-only">Buscar por nome ou endereço</label>
+          <span class="ms busca__icone" aria-hidden="true">search</span>
+          <input
+            id="busca-projetos"
+            type="search"
+            autocomplete="off"
+            placeholder="Buscar por nome ou endereço"
+            [value]="buscaDigitada()"
+            (input)="buscar($event)"
+          />
+        </div>
+
+        <div class="chips" role="group" aria-label="Filtrar por status">
+          @for (c of chips; track c.valor) {
+            <button
+              type="button"
+              class="chip"
+              [class.chip--ativo]="parametros().status === c.valor"
+              [attr.aria-pressed]="parametros().status === c.valor"
+              (click)="selecionarStatus(c.valor)"
+            >
+              @if (parametros().status === c.valor) { <span class="ms" aria-hidden="true">check</span> }
+              {{ c.rotulo }} · {{ r.totais[c.valor] }}
+            </button>
+          }
+        </div>
+
+        <div class="campo-ordem">
+          <label for="ordenar-por" class="campo-ordem__rotulo">Ordenar por</label>
+          <select id="ordenar-por" (change)="mudarOrdem($event)">
+            @for (o of ordens; track o.valor) {
+              <option [value]="o.valor" [selected]="o.valor === parametros().ordem">{{ o.rotulo }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (carregando() && !r.itens.length) {
+        <ul class="lista" aria-label="Carregando projetos" aria-busy="true">
+          @for (n of esqueleto; track n) {
+            <li class="esqueleto" aria-hidden="true"></li>
+          }
+        </ul>
+      } @else if (r.itens.length) {
+        <ul class="lista" [attr.aria-busy]="carregando()">
+          @for (p of r.itens; track p.id) {
+            <li class="item">
+              <button
+                type="button"
+                class="item__cabecalho"
+                [id]="'cab-' + p.id"
+                [attr.aria-expanded]="expandidoId() === p.id"
+                [attr.aria-controls]="'painel-' + p.id"
+                (click)="alternarExpandido(p.id)"
+              >
+                <span class="item__nome">{{ p.nome }}</span>
+                <span class="item__meta">
+                  <span class="item__data">Atualizado em {{ p.atualizadoEm | date: 'dd/MM/yyyy' }}</span>
+                  <span class="selo" [attr.data-status]="p.status">
+                    <span class="ms" aria-hidden="true">{{ statusInfo[p.status].icone }}</span>
+                    {{ statusInfo[p.status].rotulo }}
+                  </span>
+                  <span class="ms item__seta" aria-hidden="true">expand_more</span>
+                </span>
+              </button>
+
+              @if (expandidoId() === p.id) {
+                <div class="painel" [id]="'painel-' + p.id" role="region" [attr.aria-labelledby]="'cab-' + p.id">
+                  <dl class="painel__grade">
+                    <div><dt>Tipo de edificação</dt><dd>{{ p.tipoEdificacao || '—' }}</dd></div>
+                    <div><dt>Endereço</dt><dd>{{ p.endereco || '—' }}</dd></div>
+                    <div><dt>Unidades consumidoras</dt><dd>{{ p.unidadesConsumidoras ?? '—' }}</dd></div>
+                    <div><dt>Enviado em</dt><dd>{{ p.enviadoEm ? (p.enviadoEm | date: 'dd/MM/yyyy') : '—' }}</dd></div>
+                    <div><dt>Próxima etapa</dt><dd>{{ p.status === 'rascunho' ? 'Completar cadastro' : (p.proximaEtapa || '—') }}</dd></div>
+                  </dl>
+
+                  <div class="painel__acoes">
+                    <button type="button" class="ng-btn ng-btn--primario botao-36" (click)="abrirProjeto(p.id)">
+                      <span class="ms" aria-hidden="true">open_in_new</span> ABRIR PROJETO
+                    </button>
+                    <button type="button" class="ng-btn ng-btn--contorno botao-36" (click)="duplicar(p)">
+                      <span class="ms" aria-hidden="true">content_copy</span> DUPLICAR
+                    </button>
+                    @if (p.status === 'rascunho') {
+                      <button type="button" class="acao-excluir" (click)="pedirExclusao(p)">
+                        <span class="ms" aria-hidden="true">delete</span> EXCLUIR
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </li>
+          }
+        </ul>
+      } @else {
+        <!-- Estado D: filtro ou busca sem resultado -->
+        <section class="vazio vazio--linha" aria-labelledby="titulo-vazio">
+          <span class="ms vazio__lupa" aria-hidden="true">search</span>
+          <h2 id="titulo-vazio" class="vazio__titulo">{{ tituloVazio() }}</h2>
+          <p class="vazio__texto">Tente outro status ou limpe os filtros.</p>
+          <button type="button" class="link-limpar" (click)="limparFiltros()">Limpar filtros</button>
+        </section>
+      }
+
+      @if (r.itens.length) {
+        <footer class="rodape-lista">
+          <button type="button" class="ng-btn ng-btn--contorno botao-36" (click)="voltar()">
+            <span class="ms" aria-hidden="true">arrow_back</span> VOLTAR
+          </button>
+
+          <div class="paginacao">
+            <div class="paginacao__tamanho">
+              <label for="itens-por-pagina">Itens por página</label>
+              <select id="itens-por-pagina" (change)="mudarTamanho($event)">
+                @for (n of tamanhos; track n) {
+                  <option [value]="n" [selected]="n === parametros().tamanho">{{ n }}</option>
+                }
+              </select>
+            </div>
+
+            <span class="paginacao__intervalo">{{ intervalo().inicio }}–{{ intervalo().fim }} de {{ intervalo().total }}</span>
+
+            <div class="paginacao__paginas">
+              <button
+                type="button"
+                class="ng-icon-btn"
+                [disabled]="r.pagina === 1"
+                (click)="irParaPagina(r.pagina - 1)"
+                aria-label="Página anterior"
+              >
+                <span class="ms" aria-hidden="true">chevron_left</span>
+              </button>
+              @for (n of paginasVisiveis(); track n) {
+                <button
+                  type="button"
+                  class="pagina"
+                  [class.pagina--ativa]="n === r.pagina"
+                  [attr.aria-current]="n === r.pagina ? 'page' : null"
+                  [attr.aria-label]="'Página ' + n"
+                  (click)="irParaPagina(n)"
+                >
+                  {{ n }}
+                </button>
+              }
+              <button
+                type="button"
+                class="ng-icon-btn"
+                [disabled]="r.pagina === r.totalPaginas"
+                (click)="irParaPagina(r.pagina + 1)"
+                aria-label="Próxima página"
+              >
+                <span class="ms" aria-hidden="true">chevron_right</span>
+              </button>
+            </div>
+          </div>
+        </footer>
+      }
+    }
+  } @else if (erro()) {
+    <section class="vazio" role="alert">
+      <p>Não foi possível carregar seus projetos.</p>
+      <button type="button" class="ng-btn ng-btn--contorno" (click)="tentarNovamente()">TENTAR NOVAMENTE</button>
+    </section>
+  } @else {
+    <ul class="lista" aria-label="Carregando projetos" aria-busy="true">
+      @for (n of esqueleto; track n) {
+        <li class="esqueleto" aria-hidden="true"></li>
+      }
+    </ul>
+  }
+</main>
+
+<dialog
+  #dialogoExclusao
+  class="dialogo"
+  aria-labelledby="titulo-exclusao"
+  (close)="aoFecharExclusao()"
+  (click)="cliqueNoFundoExclusao($event)"
+>
+  <div class="dialogo__corpo">
+    <h2 id="titulo-exclusao">Excluir projeto?</h2>
+    <p>Esta ação não pode ser desfeita.</p>
+    <div class="dialogo__acoes">
+      <button type="button" class="ng-btn ng-btn--contorno" (click)="cancelarExclusao()">CANCELAR</button>
+      <button type="button" class="ng-btn botao-excluir" (click)="confirmarExclusao()">EXCLUIR</button>
+    </div>
+  </div>
+</dialog>
+
+<app-snackbar />
 
 <app-site-footer />
