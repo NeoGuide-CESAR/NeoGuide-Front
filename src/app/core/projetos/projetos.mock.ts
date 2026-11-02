@@ -1,7 +1,7 @@
-import { Projeto } from '../../core/projetos/projeto.model';
+import { Projeto } from './projeto.model';
 
 /**
- * Dados SIMULADOS para a tela "Meus Projetos" (artboard Meus Projetos).
+ * Dados SIMULADOS da carteira de projetos.
  * Quando a API existir, troque por um carregamento via HttpClient.
  */
 export const PROJETOS_MOCK: Projeto[] = [

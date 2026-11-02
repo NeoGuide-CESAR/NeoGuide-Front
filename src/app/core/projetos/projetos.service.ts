@@ -1,20 +1,24 @@
 import { Injectable, computed, signal } from '@angular/core';
+import { defer, Observable, of } from 'rxjs';
+import { delay } from 'rxjs/operators';
+
+import { PROJETOS_MOCK } from './projetos.mock';
+import { ParametrosListagem, ResultadoListagem, calcularListagem } from './listagem';
 import { Projeto, ResumoProjetos } from './projeto.model';
 
+/** Atraso simulado da "API" de listagem, em ms. */
+const LATENCIA_SIMULADA = 300;
+
 /**
- * Dados SIMULADOS iguais aos do moodboard.
- * Quando a API existir, carregue com HttpClient (ex.: GET /api/projetos?limite=3)
- * e preencha o signal `_projetos`.
+ * Dados SIMULADOS. Quando a API existir, troque `listar`, `duplicar` e `excluir`
+ * por chamadas HTTP (ex.: GET /api/projetos com os parâmetros da listagem)
+ * e mantenha o mesmo contrato.
  */
 @Injectable({ providedIn: 'root' })
 export class ProjetosService {
-  private readonly _projetos = signal<Projeto[]>([
-    { id: 'p1', nome: 'Residencial Jardim', atualizadoEm: '2026-10-07', status: 'rascunho', etapaAtual: 3, totalEtapas: 6 },
-    { id: 'p2', nome: 'Edifício Aurora', atualizadoEm: '2026-10-06', status: 'em_analise' },
-    { id: 'p3', nome: 'Edifício Atlântico', atualizadoEm: '2026-09-22', status: 'reprovado' },
-    { id: 'p4', nome: 'Condomínio Mirante', atualizadoEm: '2026-09-10', status: 'aprovado' },
-    { id: 'p5', nome: 'Sala Comercial Boa Vista', atualizadoEm: '2026-09-02', status: 'rascunho', etapaAtual: 1, totalEtapas: 6 },
-  ]);
+  private readonly _projetos = signal<Projeto[]>(
+    PROJETOS_MOCK.map((p) => ({ ...p, enviadoEm: p.status === 'rascunho' ? undefined : p.atualizadoEm })),
+  );
 
   readonly projetos = this._projetos.asReadonly();
 
@@ -34,4 +38,33 @@ export class ProjetosService {
   readonly rascunhoEmAndamento = computed(() =>
     this.recentes().find((p) => p.status === 'rascunho') ?? null,
   );
+
+  /** Listagem paginada com busca, status e ordenação. Os totais dos chips respeitam a busca. */
+  listar(parametros: ParametrosListagem): Observable<ResultadoListagem> {
+    return defer(() => of(calcularListagem(this._projetos(), parametros))).pipe(delay(LATENCIA_SIMULADA));
+  }
+
+  /** Cria uma cópia em rascunho no topo da lista e devolve o id da cópia. */
+  duplicar(id: string): string | null {
+    const original = this._projetos().find((p) => p.id === id);
+    if (!original) return null;
+    const hoje = new Date().toISOString().slice(0, 10);
+    const copia: Projeto = {
+      ...original,
+      id: `${original.id}-copia-${Date.now()}`,
+      nome: `Cópia de ${original.nome}`,
+      status: 'rascunho',
+      atualizadoEm: hoje,
+      criadoEm: hoje,
+      enviadoEm: undefined,
+      etapaAtual: undefined,
+      totalEtapas: undefined,
+    };
+    this._projetos.update((lista) => [copia, ...lista]);
+    return copia.id;
+  }
+
+  excluir(id: string): void {
+    this._projetos.update((lista) => lista.filter((p) => p.id !== id));
+  }
 }

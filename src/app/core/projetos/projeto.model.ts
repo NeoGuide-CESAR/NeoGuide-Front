@@ -11,6 +11,7 @@ export interface Projeto {
   endereco?: string;
   unidadesConsumidoras?: number;
   criadoEm?: string; // ISO 8601
+  enviadoEm?: string; // ISO 8601; ausente em rascunhos
   proximaEtapa?: string;
 }
 
