@@ -33,5 +33,10 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./features/calculo-demanda/calculo-demanda.page').then((m) => m.CalculoDemandaPage),
   },
+  {
+    path: 'sessao-expirada',
+    title: 'Sessão expirada · NeoGuide',
+    loadComponent: () => import('./features/sessao-expirada/sessao-expirada.page').then((m) => m.SessaoExpiradaPage),
+  },
   { path: '**', redirectTo: 'login' },
 ];

@@ -88,7 +88,8 @@
   .ms { font-size: 16px; }
   &:hover { border-color: var(--ng-verde); }
   &:focus-visible { outline: 3px solid var(--ng-link); outline-offset: 2px; }
-  &--ativo { background: var(--ng-verde); border-color: var(--ng-verde); color: var(--ng-branco); }
+  /* a confirmar com o design: o guia usa #007F33 em "Todos" e o print mostra #00402A */
+  &--ativo { background: var(--ng-verde-profundo); border-color: var(--ng-verde-profundo); color: var(--ng-branco); }
 }
 
 .ordenacao {
@@ -259,18 +260,62 @@
 
 /* ---------- Estado vazio ---------- */
 .vazio {
-  padding: 48px 24px;
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
   text-align: center;
+}
+
+/* Estado C: sem nenhum projeto (bloco creme) */
+.vazio--bloco {
+  border-radius: 24px;
+  background: var(--ng-creme);
+}
+.vazio__icone {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ng-branco);
+  color: var(--ng-verde-escuro);
+  .ms { font-size: 24px; }
+}
+
+/* Estado D: filtro sem resultado (borda tracejada) */
+.vazio--linha {
+  border: 1px dashed var(--ng-cinza);
+  border-radius: var(--ng-raio-card);
+}
+.vazio__lupa {
+  font-size: 24px;
+  color: var(--ng-cinza);
+}
+
+.vazio__titulo {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
   color: var(--ng-texto-3);
 }
+.vazio__texto {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ng-texto);
+  .vazio--linha & { color: var(--ng-cinza); }
+}
+
 .link-limpar {
-  margin-top: 8px;
   border: 0;
   background: transparent;
-  color: var(--ng-link);
+  color: var(--ng-verde-escuro);
   text-decoration: underline;
   cursor: pointer;
   font: inherit;
+  font-size: 14px;
   &:focus-visible { outline: 3px solid var(--ng-link); outline-offset: 2px; }
 }
 

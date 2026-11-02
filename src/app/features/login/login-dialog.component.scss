@@ -1,14 +1,13 @@
+/* Cartão do estado A: 320px, borda do guia e sem sombra */
 .janela {
-  width: min(528px, calc(100vw - 32px));
+  width: min(320px, calc(100vw - 32px));
   max-height: calc(100dvh - 32px);
   padding: 0;
-  border: 0;
-  border-radius: 4px;
+  border: 1px solid var(--ng-borda);
+  border-radius: var(--ng-raio-card);
   color: var(--ng-texto);
-  box-shadow:
-    0 11px 15px -7px rgba(0, 16, 11, 0.2),
-    0 24px 38px 3px rgba(0, 16, 11, 0.14),
-    0 9px 46px 8px rgba(0, 16, 11, 0.12);
+  background: var(--ng-branco);
+  box-shadow: none;
 
   &::backdrop { background: rgba(0, 0, 0, 0.32); }
 
@@ -21,12 +20,19 @@
 }
 
 .janela__corpo {
-  padding: 24px 24px 28px;
+  padding: 32px;
   display: flex;
   flex-direction: column;
   gap: 16px;
   font-size: 16px;
   line-height: 24px;
+}
+
+.titulo {
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--ng-texto-3);
 }
 
 .janela__topo {
@@ -58,11 +64,12 @@
   gap: 10px;
   padding: 12px;
   border-radius: 4px;
-  background: var(--ng-erro-bg);
-  color: var(--ng-erro);
+  background: var(--ng-danger-bg);
+  color: var(--ng-danger);
   font-size: 14px;
   line-height: 20px;
   .ms { font-size: 20px; }
+  strong { font-weight: 700; }
 }
 
 /* Campo com rótulo "flutuando" na borda, como no protótipo */
@@ -79,7 +86,7 @@
   top: -9px;
   padding: 0 4px;
   background: var(--ng-branco);
-  font-size: 12px;
+  font-size: 13px;
   line-height: 16px;
   color: var(--ng-verde-escuro);
   z-index: 1;
@@ -112,9 +119,9 @@
 .campo__olho { width: 40px; height: 40px; }
 
 .campo--erro {
-  .campo__rotulo { color: var(--ng-erro); }
+  .campo__rotulo { color: var(--ng-danger); }
   .campo__caixa,
-  .campo__caixa:focus-within { border-color: var(--ng-erro); box-shadow: inset 0 0 0 1px var(--ng-erro); }
+  .campo__caixa:focus-within { border-color: var(--ng-danger); box-shadow: inset 0 0 0 1px var(--ng-danger); }
 }
 .campo__erro {
   display: flex;
@@ -126,12 +133,18 @@
   .ms { font-size: 16px; }
 }
 
-.esqueci { display: flex; justify-content: flex-end; }
-
-.entrar {
-  align-self: center;
-  width: min(240px, 100%);
+.esqueci {
+  display: flex;
+  justify-content: flex-end;
+  font-size: 14px;
 }
+.esqueci__link {
+  color: var(--ng-link);
+  text-decoration: underline;
+  &:focus-visible { outline: 3px solid var(--ng-link); outline-offset: 2px; }
+}
+
+.entrar { width: 100%; }
 
 .spinner {
   width: 16px;

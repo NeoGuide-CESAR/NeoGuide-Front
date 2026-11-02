@@ -115,4 +115,4 @@
   <h2 id="titulo-conteudo">{{ conteudo().titulo }}</h2>
   <p>{{ conteudo().texto }}</p>
 </dialog>
-<app-login-dialog (fechou)="limparQuery()" />
+<app-login-dialog [returnUrl]="returnUrl()" (fechou)="limparQuery()" />

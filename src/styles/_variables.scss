@@ -200,6 +200,8 @@ $light-mode-input-placeholder-color: #9ca3af;
   --ng-erro: #b71010;
   --ng-erro-bg: #fdeded;
   --ng-link: #007acb;
+  --ng-danger: #da1414;        /* vermelho do guia (alertas de erro, campo inválido) */
+  --ng-danger-bg: rgba(218, 20, 20, 0.08); /* a confirmar com o design: tom de #DA1414 com baixa opacidade */
 
   /* Raios e layout */
   --ng-raio-card: 10px;

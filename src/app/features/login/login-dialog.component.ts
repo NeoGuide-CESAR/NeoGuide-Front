@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   inject,
+  input,
   output,
   signal,
   viewChild,
@@ -12,7 +13,11 @@ import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
 import { AuthService } from '../../core/auth/auth.service';
+import { ROTA_INICIAL, sanitizarRetorno } from '../../core/auth/return-url';
 import { documentoOuEmailValidator } from '../../shared/validators/documento.validator';
+
+/** Mensagem genérica de credenciais: não revela qual campo está errado (decisão de segurança). */
+const ERRO_CREDENCIAIS = 'Confira os dados ou redefina sua senha.';
 
 /**
  * Janela de login do projetista (artboard 07).
@@ -34,11 +39,17 @@ export class LoginDialogComponent {
 
   private readonly dialogRef = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
   private readonly campoDocumento = viewChild.required<ElementRef<HTMLInputElement>>('campoDocumento');
+  private readonly campoSenha = viewChild.required<ElementRef<HTMLInputElement>>('campoSenha');
 
+  /** Rota a abrir depois do login (vinda de ?returnUrl=). */
+  readonly returnUrl = input<string>();
   readonly fechou = output<void>();
 
   readonly mostrarSenha = signal(false);
   readonly enviando = signal(false);
+  /** Erro de credenciais: true mostra o alerta e marca os dois campos como inválidos. */
+  readonly erroCredenciais = signal(false);
+  readonly textoErroCredenciais = ERRO_CREDENCIAIS;
   readonly erroServidor = signal<string | null>(null);
 
   readonly form = this.fb.nonNullable.group({
@@ -92,6 +103,7 @@ export class LoginDialogComponent {
       this.form.markAllAsTouched();
       return;
     }
+    this.erroCredenciais.set(false);
     this.erroServidor.set(null);
     this.enviando.set(true);
 
@@ -101,9 +113,16 @@ export class LoginDialogComponent {
       .subscribe({
         next: () => {
           this.fechar();
-          this.router.navigateByUrl('/inicio');
+          this.router.navigateByUrl(sanitizarRetorno(this.returnUrl()) ?? ROTA_INICIAL);
         },
-        error: (e: Error) => this.erroServidor.set(e.message || 'Não foi possível entrar. Tente de novo.'),
+        error: () => this.falharLogin(),
       });
+  }
+
+  /** Mostra o alerta, limpa só a senha, mantém o e-mail e devolve o foco para a senha. */
+  private falharLogin(): void {
+    this.erroCredenciais.set(true);
+    this.form.controls.senha.reset('');
+    queueMicrotask(() => this.campoSenha().nativeElement.focus());
   }
 }

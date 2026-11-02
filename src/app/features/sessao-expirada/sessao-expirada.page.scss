@@ -1,0 +1,51 @@
+:host {
+  display: flex;
+  min-height: 100dvh;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  /* fundo neutro mais próximo do guia (a confirmar com o design) */
+  background: var(--ng-fundo-suave);
+}
+
+.sessao { width: 100%; display: flex; justify-content: center; }
+
+.cartao {
+  width: 320px;
+  max-width: 100%;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  background: var(--ng-branco);
+  border: 1px solid var(--ng-borda);
+  border-radius: var(--ng-raio-card);
+}
+
+.cartao__icone {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ng-creme);
+  color: var(--ng-laranja);
+}
+
+h1 {
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 700;
+  color: var(--ng-texto-3);
+}
+
+p {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ng-texto);
+}
+
+.botao { width: 100%; }
