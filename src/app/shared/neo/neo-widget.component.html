@@ -1,0 +1,111 @@
+@if (autenticado()) {
+  @if (estado.painelVisivel()) {
+    <div class="fundo" aria-hidden="true" (click)="minimizar()"></div>
+    <section
+      #painel
+      id="neo-painel"
+      class="painel"
+      role="dialog"
+      aria-labelledby="neo-titulo"
+      [attr.aria-modal]="mobile() ? 'true' : 'false'"
+      (keydown)="aoTab($event)"
+    >
+      <header class="cabecalho">
+        <span class="avatar ms" aria-hidden="true">bolt</span>
+        <div class="cabecalho__texto">
+          <h2 id="neo-titulo">Neo</h2>
+          <p>Dúvidas sobre a norma DIS-NOR-053</p>
+        </div>
+        <div class="cabecalho__acoes">
+          <button type="button" class="icone" aria-label="Ver histórico de conversas" (click)="estado.abrirHistorico()">
+            <span class="ms" aria-hidden="true">history</span>
+          </button>
+          <button type="button" class="icone" aria-label="Minimizar" (click)="minimizar()">
+            <span class="ms" aria-hidden="true">minimize</span>
+          </button>
+          <button type="button" class="icone" aria-label="Fechar o assistente" (click)="fechar()">
+            <span class="ms" aria-hidden="true">close</span>
+          </button>
+        </div>
+      </header>
+
+      @if (estado.visao() === 'historico') {
+        <app-neo-historico (voltar)="estado.voltarAoChat()" />
+      } @else {
+        <div #log class="mensagens" role="log" aria-live="polite" aria-relevant="additions">
+          @for (mensagem of estado.mensagens(); track mensagem.id) {
+            <app-neo-mensagem [mensagem]="mensagem" (tentar)="estado.tentarNovamente()" />
+          }
+          @if (estado.emAndamento()) {
+            <div class="digitando" role="status" aria-label="O Neo está respondendo">
+              <span class="avatar ms" aria-hidden="true">bolt</span>
+              <div class="digitando__bolha" aria-hidden="true"><i></i><i></i><i></i></div>
+            </div>
+          }
+        </div>
+
+        <div class="rodape-chat">
+          @if (mostrarSugestoes()) {
+            <ul class="sugestoes" aria-label="Sugestões de perguntas">
+              @for (pergunta of sugestoes; track pergunta) {
+                <li><button type="button" class="pilula" (click)="sugerir(pergunta)">{{ pergunta }}</button></li>
+              }
+            </ul>
+          }
+
+          <div class="contexto">
+            @if (estado.contextoAtivo(); as projeto) {
+              <span class="ms" aria-hidden="true">link</span>
+              <span class="contexto__texto">
+                Enviado junto: {{ projeto.nome }}@if (projeto.etapaAtual && projeto.totalEtapas) {, etapa {{ projeto.etapaAtual }} de {{ projeto.totalEtapas }}}
+              </span>
+              <button type="button" class="icone icone--pequeno" aria-label="Remover o projeto do contexto" (click)="estado.removerContexto()">
+                <span class="ms" aria-hidden="true">close</span>
+              </button>
+            } @else if (estado.contextoRemovidoVisivel()) {
+              <span class="contexto__texto">Sem projeto selecionado</span>
+              <button type="button" class="link" (click)="estado.restaurarContexto()">Usar o projeto atual</button>
+            }
+          </div>
+
+          <form class="entrada" (ngSubmit)="enviar()">
+            <label for="neo-pergunta" class="sr-only">Pergunte sobre a norma</label>
+            <textarea
+              #campo
+              id="neo-pergunta"
+              rows="1"
+              placeholder="Pergunte sobre a norma"
+              maxlength="500"
+              [value]="rascunho()"
+              (input)="aoDigitar($event)"
+              (keydown)="aoTeclar($event)"
+            ></textarea>
+            @if (rascunho().length > limiteContador) {
+              <span class="contador" aria-live="polite">{{ rascunho().length }}/{{ limite }}</span>
+            }
+            <button type="submit" class="enviar" aria-label="Enviar pergunta" [disabled]="!podeEnviar()">
+              <span class="ms" aria-hidden="true">send</span>
+            </button>
+          </form>
+
+          <p class="aviso-rodape">O Neo orienta e não altera os dados do projeto. Suas conversas ficam salvas no Histórico.</p>
+        </div>
+      }
+    </section>
+  }
+
+  <button
+    #lancador
+    type="button"
+    class="lancador"
+    [attr.aria-label]="estado.painelVisivel() ? 'Minimizar o assistente Neo' : 'Abrir o assistente Neo'"
+    [attr.aria-expanded]="estado.painelVisivel()"
+    aria-controls="neo-painel"
+    (click)="alternarPainel()"
+  >
+    <span class="ms" aria-hidden="true">{{ estado.painelVisivel() ? 'expand_more' : 'chat' }}</span>
+    @if (!estado.painelVisivel() && estado.naoLidas() > 0) {
+      <span class="badge" aria-hidden="true">{{ estado.naoLidas() }}</span>
+    }
+  </button>
+}
