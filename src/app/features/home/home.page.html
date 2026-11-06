@@ -88,7 +88,7 @@
         <ul class="projetos">
           @for (p of recentes(); track p.id) {
             <li>
-              <a class="projeto" href="#">
+              <a class="projeto" [routerLink]="['/projetos', p.id]">
                 <span class="projeto__nome">{{ p.nome }}</span>
                 <span class="projeto__meta">
                   <time [attr.datetime]="p.atualizadoEm">{{ p.atualizadoEm | date: 'dd/MM/yyyy' }}</time>
