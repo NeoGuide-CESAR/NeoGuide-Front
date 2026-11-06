@@ -1,0 +1,37 @@
+<app-projeto-layout secao="calculo">
+  <main class="projeto-pagina" [attr.aria-busy]="consulta.estado() === 'carregando'">
+    @if (projeto(); as p) {
+      <div class="conteudo">
+        <header class="cabecalho">
+          <div class="cabecalho__texto"><app-projeto-breadcrumb [itens]="breadcrumb()" /><div class="titulo"><h1>Resultado do cálculo</h1>@if (p.resultado) { <app-projeto-status status="calculado" /> }</div></div>
+          <div class="acoes">
+            <a class="ng-btn ng-btn--contorno" [routerLink]="['/projetos', p.id, 'calculo']"><span class="ms" aria-hidden="true">edit</span>REVISAR DADOS</a>
+            <button type="button" class="ng-btn ng-btn--primario" [disabled]="!p.resultado" (click)="solicitarMemorial(p)"><span class="ms" aria-hidden="true">description</span>GERAR MEMORIAL</button>
+          </div>
+        </header>
+        @if (p.resultado; as resultado) {
+          <section class="resultado-total" aria-labelledby="resultado-total">
+            <div class="resultado-total__principal"><h2 id="resultado-total">DEMANDA TOTAL DO PROJETO</h2><p class="resultado-total__valor">{{ resultado.demandaTotal | kva }}</p><p class="resultado-total__norma">Calculado em <time [attr.datetime]="resultado.calculadoEm">{{ resultado.calculadoEm | date:'dd/MM/yyyy':'-0300' }} às {{ resultado.calculadoEm | date:'HH:mm':'-0300' }}</time> conforme a {{ resultado.norma }}</p></div>
+            <dl class="resultado-total__resumo">@for (item of resumo(); track item.rotulo) { <div><dt>{{ item.rotulo }}</dt><dd>{{ item.aplicavel ? (item.valor | kva) : 'não se aplica a este projeto' }}</dd></div> }</dl>
+          </section>
+          <section class="etapas" aria-labelledby="resultado-etapas"><h2 id="resultado-etapas">Resultado por etapa</h2>
+            @for (etapa of etapas(); track etapa.numero) {
+              <app-projeto-card [tituloId]="'resultado-etapa-' + etapa.numero">
+                <div class="resultado-etapa" [class.resultado-etapa--com-demanda]="etapa.demandas.length > 0">
+                  <div class="resultado-etapa__dados"><h3 [id]="'resultado-etapa-' + etapa.numero"><span class="etapa-numero">{{ etapa.numero }}</span>{{ etapa.titulo }}</h3><p class="rotulo">INFORMAÇÕES PREENCHIDAS</p><app-projeto-etapa-dados [etapa]="etapa" modo="resultado" /></div>
+                  @if (etapa.demandas.length) {
+                    <section class="resultado-etapa__demanda" [attr.aria-label]="'Resultado da etapa ' + etapa.numero"><h4 class="rotulo">RESULTADO DA ETAPA</h4>
+                      @for (demanda of etapa.demandas; track demanda.rotulo) { <div class="demanda-etapa"><p>{{ demanda.rotulo }}</p>@if (demanda.aplicavel) { <strong>{{ demanda.valor | kva }}</strong> } @else { <span class="ausente">não se aplica a este projeto</span> }</div> }
+                    </section>
+                  }
+                </div>
+              </app-projeto-card>
+            }
+          </section>
+        } @else {
+          <app-projeto-card tituloId="sem-resultado"><h2 id="sem-resultado">Resultado ainda não disponível</h2><p class="ausente">{{ p.resultadoInvalidado ? 'Os dados do projeto foram alterados. É necessário recalcular para consultar um resultado atualizado.' : 'Este projeto ainda não tem um resultado de cálculo. Revise os dados para continuar.' }}</p><a class="ng-btn ng-btn--contorno voltar" [routerLink]="['/projetos', p.id]">VOLTAR AO PROJETO</a></app-projeto-card>
+        }
+      </div>
+    } @else { <app-projeto-estado [estado]="consulta.estado()" (tentarNovamente)="consulta.recarregar()" /> }
+  </main>
+</app-projeto-layout>

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 export interface LinkNav {
@@ -6,6 +6,7 @@ export interface LinkNav {
   rota?: string;      // rota interna do Angular
   href?: string;      // link externo / ainda sem rota
   submenu?: boolean;  // mostra a setinha expand_more
+  ativo?: boolean;
 }
 
 /**
@@ -28,20 +29,23 @@ export interface LinkNav {
           <span class="marca__nome">NeoGuide</span>
           @if (usoInterno()) { <span class="marca__interno">USO INTERNO</span> }
         </a>
-        <div class="topo__acoes"><ng-content /></div>
+        <div class="topo__acoes"><ng-content />
+          @if (menuResponsivo()) { <button type="button" class="nav__menu" [attr.aria-label]="menuAberto() ? 'Fechar menu' : 'Abrir menu'" [attr.aria-expanded]="menuAberto()" aria-controls="menu-projeto" (click)="menuAberto.update(alternar)"><span class="ms" aria-hidden="true">menu</span></button> }
+        </div>
       </div>
     </header>
 
     @if (links().length) {
-      <nav class="nav" aria-label="Navegação principal">
-        <ul class="ng-container nav__lista">
+      <nav class="nav" [class.nav--responsiva]="menuResponsivo()" aria-label="Navegação principal">
+        <ul class="ng-container nav__lista" [class.nav__lista--aberta]="menuAberto()" [attr.id]="menuResponsivo() ? 'menu-projeto' : null">
           @for (link of links(); track link.rotulo; let primeiro = $first) {
             <li>
               @if (link.rota) {
                 <a
                   class="nav__link"
+                  [class.nav__link--ativo]="link.ativo"
                   [routerLink]="link.rota"
-                  routerLinkActive="nav__link--ativo"
+                  [routerLinkActive]="link.ativo === undefined ? 'nav__link--ativo' : ''"
                   ariaCurrentWhenActive="page"
                 >
                   {{ link.rotulo }}
@@ -129,6 +133,13 @@ export interface LinkNav {
     .nav__link:hover { background: var(--ng-verde-claro); color: var(--ng-verde-profundo); }
     .nav__link:focus-visible { outline: 3px solid var(--ng-link); outline-offset: -3px; }
     .nav__link--ativo { font-weight: 700; }
+    .nav__menu { display:none; align-items:center; justify-content:center; width:40px; height:40px; border:0; background:transparent; color:var(--ng-branco); cursor:pointer; }
+    .nav__menu:focus-visible { outline:3px solid var(--ng-branco); outline-offset:2px; }
+    @media(max-width:767px) {
+      .nav__menu { display:inline-flex; }
+      .nav--responsiva .nav__lista { display:none; padding-inline:var(--ng-gutter); }
+      .nav--responsiva .nav__lista--aberta { display:flex; flex-direction:column; align-items:stretch; gap:4px; padding-bottom:16px; }
+    }
 
     @media (max-width: 600px) {
       .marca__logo, .marca__div { display: none; }
@@ -140,4 +151,7 @@ export class SiteHeaderComponent {
   readonly links = input<LinkNav[]>([]);
   /** Marca o primeiro link como ativo quando não há rotas (página pública). */
   readonly destacarPrimeiro = input(false);
+  readonly menuResponsivo = input(false);
+  readonly menuAberto = signal(false);
+  readonly alternar = (aberto: boolean) => !aberto;
 }

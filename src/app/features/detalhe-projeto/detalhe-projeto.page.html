@@ -1,0 +1,55 @@
+<app-projeto-layout>
+  <main class="projeto-pagina" [attr.aria-busy]="consulta.estado() === 'carregando'">
+    @if (projeto(); as p) {
+      <div class="conteudo">
+        <header class="cabecalho">
+          <div class="cabecalho__texto">
+            <app-projeto-breadcrumb [itens]="breadcrumb()" />
+            <div class="titulo"><h1>{{ p.nome }}</h1><app-projeto-status [status]="p.status" /></div>
+            <p class="atualizado">Atualizado em <time [attr.datetime]="p.atualizadoEm">{{ p.atualizadoEm | date:'dd/MM/yyyy':'-0300' }}</time></p>
+          </div>
+          <div class="acoes">
+            <button type="button" class="ng-btn ng-btn--contorno botao-duplicar" [disabled]="!!duplicacao.duplicando()" (click)="duplicacao.executar(p.id, $event)"><span class="ms" aria-hidden="true">content_copy</span>{{ duplicacao.duplicando() === p.id ? 'DUPLICANDO…' : 'DUPLICAR' }}</button>
+            <a class="ng-btn ng-btn--primario" [routerLink]="['/projetos', p.id, 'calculo']"><span class="ms" aria-hidden="true">edit</span>EDITAR</a>
+          </div>
+        </header>
+        <div class="detalhe-grid">
+          <div class="coluna coluna--principal">
+            <app-projeto-card tituloId="dados-projeto">
+              <h2 id="dados-projeto">Dados do projeto</h2>
+              <dl class="dados">@for (linha of dados(); track linha.rotulo) { <dt>{{ linha.rotulo }}</dt><dd>{{ linha.valor }}</dd> }</dl>
+            </app-projeto-card>
+            <app-projeto-card tituloId="informacoes-etapas">
+              <h2 id="informacoes-etapas">Informações por etapa</h2>
+              <div class="etapas">@for (etapa of etapas(); track etapa.numero) {
+                <section class="etapa" [attr.aria-labelledby]="'detalhe-etapa-' + etapa.numero">
+                  <h3 [id]="'detalhe-etapa-' + etapa.numero">{{ etapa.numero }} · {{ etapa.titulo }}</h3>
+                  <app-projeto-etapa-dados [etapa]="etapa" modo="detalhe" />
+                </section>
+              }</div>
+            </app-projeto-card>
+          </div>
+          <aside class="coluna coluna--lateral" aria-label="Demanda e andamento do projeto">
+            <section class="demanda" aria-labelledby="demanda-total">
+              <h2 id="demanda-total">DEMANDA TOTAL</h2>
+              @if (p.resultado; as resultado) {
+                <p class="demanda__valor">{{ resultado.demandaTotal | kva }}</p>
+                <p class="demanda__norma">Calculado em <time [attr.datetime]="resultado.calculadoEm">{{ resultado.calculadoEm | date:'dd/MM/yyyy':'-0300' }}</time> conforme a {{ resultado.norma }}</p>
+                <a [routerLink]="['/projetos', p.id, 'resultado']">Ver resultado completo<span class="ms" aria-hidden="true">arrow_forward</span></a>
+              } @else {
+                <p class="demanda__pendente">{{ p.resultadoInvalidado ? 'É necessário recalcular' : 'Ainda não calculado' }}</p>
+                <p class="demanda__norma">Revise os dados do projeto para obter um resultado atualizado.</p>
+              }
+            </section>
+            <app-projeto-card class="andamento" tituloId="andamento-projeto">
+              <h2 id="andamento-projeto">Andamento</h2>
+              <dl class="dados andamento__dados"><dt>Enviado em</dt><dd>{{ p.enviadoEm ? (p.enviadoEm | date:'dd/MM/yyyy':'-0300') : 'Ainda não enviado' }}</dd><dt>Próxima etapa</dt><dd>{{ p.proximaEtapa || 'Completar cadastro' }}</dd></dl>
+            </app-projeto-card>
+          </aside>
+        </div>
+        <a class="ng-btn voltar" routerLink="/meus-projetos">VOLTAR</a>
+      </div>
+    } @else { <app-projeto-estado [estado]="consulta.estado()" (tentarNovamente)="consulta.recarregar()" /> }
+  </main>
+</app-projeto-layout>
+<app-snackbar />

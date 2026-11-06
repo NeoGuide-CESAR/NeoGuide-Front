@@ -1,0 +1,28 @@
+:host { display:block; }
+.resultado-total { display:flex; align-items:center; justify-content:space-between; gap:48px; padding:36px 48px; border-radius:var(--ng-raio-destaque); background:var(--ng-verde-profundo); color:var(--ng-branco); }
+.resultado-total__principal { display:flex; flex-direction:column; gap:6px; min-width:0; }
+.resultado-total h2 { font-size:14px; line-height:20px; letter-spacing:.08em; color:var(--ng-resultado-apoio); }
+.resultado-total__valor { font-size:56px; line-height:64px; font-weight:700; overflow-wrap:anywhere; }
+.resultado-total__norma { font-size:15px; line-height:22px; color:var(--ng-verde-claro); }
+.resultado-total__resumo { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 32px; margin:0; font-size:15px; line-height:22px; }
+.resultado-total__resumo dt { color:var(--ng-resultado-apoio); }
+.resultado-total__resumo dd { color:var(--ng-branco); font-weight:700; }
+.etapas { display:flex; flex-direction:column; gap:16px; }
+.etapas>h2 { font-size:22px; color:var(--ng-verde-escuro); }
+.resultado-etapa { display:grid; grid-template-columns:minmax(0,1fr); gap:32px; align-items:start; }
+.resultado-etapa--com-demanda { grid-template-columns:minmax(0,1fr) 340px; }
+.resultado-etapa__dados { display:flex; flex-direction:column; gap:16px; min-width:0; }
+.resultado-etapa h3 { display:flex; align-items:center; gap:10px; margin:0; font-size:18px; line-height:24px; font-weight:700; color:var(--ng-verde-profundo); }
+.etapa-numero { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; flex-shrink:0; border-radius:50%; background:var(--ng-verde-escuro); color:var(--ng-branco); font-size:13px; }
+.rotulo { font-size:13px; line-height:20px; font-weight:700; letter-spacing:.08em; color:var(--ng-texto-3); }
+.resultado-etapa__demanda { display:flex; flex-direction:column; gap:16px; border-radius:var(--ng-raio-resultado); background:var(--ng-creme); padding:24px; }
+.demanda-etapa { display:flex; flex-direction:column; gap:4px; }
+.demanda-etapa p { font-size:14px; line-height:20px; color:var(--ng-texto-3); }
+.demanda-etapa strong { font-size:26px; line-height:32px; font-weight:700; color:var(--ng-verde-profundo); overflow-wrap:anywhere; }
+@media(max-width:1024px) { .resultado-total { flex-direction:column; align-items:stretch; gap:24px; } .resultado-etapa--com-demanda { grid-template-columns:minmax(0,1fr); } }
+@media(max-width:767px) {
+  .resultado-total { padding:24px; }
+  .resultado-total__valor { font-size:40px; line-height:48px; }
+  .resultado-total__resumo { grid-template-columns:minmax(0,1fr); gap:16px; }
+  .resultado-etapa__demanda { padding:24px; }
+}

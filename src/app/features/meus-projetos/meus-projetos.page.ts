@@ -15,6 +15,8 @@ import {
 } from '../../core/projetos/listagem';
 import { Projeto, STATUS_INFO, StatusProjeto } from '../../core/projetos/projeto.model';
 import { ProjetosService } from '../../core/projetos/projetos.service';
+import { DuplicarProjetoService } from '../../core/projetos/duplicar-projeto.service';
+import { ProjetosApiService } from '../../core/projetos/projetos-api.service';
 import { SnackbarService } from '../../core/ui/snackbar.service';
 import { SiteFooterComponent } from '../../shared/layout/site-footer.component';
 import { LinkNav, SiteHeaderComponent } from '../../shared/layout/site-header.component';
@@ -56,6 +58,7 @@ const DEBOUNCE_BUSCA = 300;
   templateUrl: './meus-projetos.page.html',
   styleUrl: './meus-projetos.page.scss',
   host: {
+    'class': 'us13',
     '(document:keydown.escape)': 'expandidoId.set(null)',
   },
 })
@@ -63,6 +66,8 @@ export class MeusProjetosPage {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly projetos = inject(ProjetosService);
+  readonly duplicacao = inject(DuplicarProjetoService);
+  private readonly api = inject(ProjetosApiService);
   private readonly snackbar = inject(SnackbarService);
   private readonly dialogoExclusao = viewChild.required<ElementRef<HTMLDialogElement>>('dialogoExclusao');
 
@@ -195,18 +200,6 @@ export class MeusProjetosPage {
     this.expandidoId.update((atual) => (atual === id ? null : id));
   }
 
-  duplicar(projeto: Projeto): void {
-    const copiaId = this.projetos.duplicar(projeto.id);
-    if (!copiaId) return;
-    this.versao.update((v) => v + 1);
-    this.snackbar.mostrar('Projeto duplicado com sucesso.', {
-      rotulo: 'DESFAZER',
-      executar: () => {
-        this.projetos.excluir(copiaId);
-        this.versao.update((v) => v + 1);
-      },
-    });
-  }
 
   pedirExclusao(projeto: Projeto): void {
     this.paraExcluir.set(projeto);
@@ -230,9 +223,10 @@ export class MeusProjetosPage {
     const projeto = this.paraExcluir();
     this.cancelarExclusao();
     if (!projeto) return;
-    this.projetos.excluir(projeto.id);
-    this.versao.update((v) => v + 1);
-    this.snackbar.mostrar('Projeto excluído.');
+    this.api.excluir(projeto.id).subscribe({
+      next: () => { this.versao.update(v => v + 1); this.snackbar.mostrar('Projeto excluído.'); },
+      error: () => this.snackbar.mostrar('Não foi possível excluir o projeto. Tente novamente.'),
+    });
   }
 
   /** Mantém a busca digitada e a URL sincronizadas, sem perder o foco do campo. */

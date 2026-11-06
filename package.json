@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "lint": "eslint src/app/core/projetos src/app/features/calculo-demanda src/app/features/detalhe-projeto src/app/features/resultado-calculo src/app/features/meus-projetos src/app/shared/projeto src/app/shared/layout/site-header.component.ts src/app/shared/wizard/wizard-body.component.ts src/app/shared/ui/snackbar.component.ts src/environments"
   },
   "private": true,
   "dependencies": {
@@ -27,6 +28,9 @@
     "@angular/cli": "^18.2.21",
     "@angular/compiler-cli": "^18.2.0",
     "@types/jasmine": "~5.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.72.1",
+    "@typescript-eslint/parser": "^8.72.1",
+    "eslint": "^9.39.5",
     "jasmine-core": "~5.2.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",

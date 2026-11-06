@@ -1,0 +1,25 @@
+@if (!etapa().aplicavel) {
+  <p class="ausente">não se aplica a este projeto</p>
+} @else {
+@if (etapa().residencial; as residencial) {
+  @if (!residencial.grupos.length) { <p class="ausente">Nenhum valor informado</p> }
+  @else if (modo() === 'detalhe') {
+    <div class="tabela" tabindex="0" role="region" aria-label="Grupos de unidades residenciais">
+      <table><thead><tr><th scope="col">Grupo</th><th scope="col">Unidades</th><th scope="col">Metragem de cada</th></tr></thead>
+        <tbody>@for (grupo of residencial.grupos; track $index) { <tr><td>Grupo {{ $index + 1 }}</td><td>{{ numero(grupo.unidades) }}</td><td>{{ numero(grupo.area) }}@if (grupo.area !== null) { m² }</td></tr> }</tbody>
+      </table>
+    </div>
+    <p class="smart"><span>{{ 'Smart studio: ' }}</span><strong>{{ etapa().linhas[etapa().linhas.length - 1].valor }}</strong></p>
+  } @else {
+    <dl>@for (linha of linhas(); track $index) { <dt>{{ linha.rotulo }}</dt><dd>{{ linha.valor }}</dd> }</dl>
+  }
+} @else if (!linhas().length) {
+  <p class="ausente">Nenhum valor informado</p>
+} @else if (modo() === 'detalhe') {
+  <div class="linhas">@for (linha of linhas(); track $index) {
+    <p>@if (etapa().numero !== 4) { <span class="rotulo">{{ linha.rotulo + ': ' }}</span> }<span [class.ausente]="linha.ausente">{{ linha.valor }}</span></p>
+  }</div>
+} @else {
+  <dl>@for (linha of linhas(); track $index) { <dt>{{ linha.rotulo }}</dt><dd [class.ausente]="linha.ausente">{{ linha.valor }}</dd> }</dl>
+}
+}

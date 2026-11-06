@@ -10,7 +10,7 @@
     }
   </nav>
 
-  <div class="titulo-linha"><h1 class="titulo-texto">{{ tituloExibido() }}</h1>@if (edicao()) { <span class="rascunho">Rascunho</span> }</div>
+  <div class="titulo-linha"><h1 class="titulo-texto">{{ tituloExibido() }}</h1>@if (edicao()) { <span class="rascunho">@if (rotuloStatus() === 'Rascunho') { <span class="ms" aria-hidden="true">edit_note</span> }{{ rotuloStatus() }}</span> }</div>
   <p class="subtitulo">{{ subtitulo() }}</p>
 </div>
 

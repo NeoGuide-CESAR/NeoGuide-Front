@@ -215,6 +215,15 @@ $light-mode-input-placeholder-color: #9ca3af;
   --ng-max: 1140px;
 
   --ng-fonte: 'IberPangea Text', Figtree, system-ui, sans-serif;
+  /* Tokens medidos nas pranchetas 22, 24 e 27 do moodboard. */
+  --ng-versao-fundo: #fff5ec;
+  --ng-versao-borda: #f3d9bf;
+  --ng-aviso: #b95000;
+  --ng-aprovado-texto: #0b4d33;
+  --ng-resultado-apoio: #a9d8bc;
+  --ng-carregamento-fundo: #f7f4f1;
+  --ng-raio-destaque: 24px;
+  --ng-raio-resultado: 16px;
 }
 
 @media (max-width: 600px) {
