@@ -1,7 +1,17 @@
 import { ProjetoHttp } from './projeto-http';
 
-/** Dados das pranchetas 24 (Aurora) e 22 (Jardim). Zeros são valores numéricos ilustrativos, não fórmulas. */
+/** Aurora/Jardim reproduzem as pranchetas. Boa Viagem é um exemplo aprovado com valores ilustrativos prontos, sem fórmulas. */
 export const PROJETOS_ARTBOARDS: ProjetoHttp[] = [
+  {
+    id: 'p3', nome: 'Residencial Boa Viagem', status: 'APROVADO', cep: '50050000', logradouro: 'Av. Boa Viagem, 2200',
+    bairro: 'Boa Viagem', municipio: 'Recife', uf: 'PE', tipoEdificacao: 'Residencial multifamiliar', temVe: true, temBomba: true,
+    atualizadoEm: '2026-09-30T12:00:00-03:00', enviadoEm: '2026-09-29T14:30:00-03:00', proximaEtapa: 'Nenhuma pendência',
+    complementos: {
+      residencial: { grupos: [{ unidades: 64, area: 65, smartStudio: false }] }, cargas: { tomadas: 12, lampadas: 20 },
+      comercial: [], especiais: { pontos: 2, bombas: 1, potenciaCv: 5 },
+    },
+    resultado: { demandaTotal: 152.4, calculadoEm: '2026-09-29T14:20:00-03:00', norma: 'DIS-NOR-053', porEtapa: { residencial: 120, areaComum: 14.4, comercial: null, veiculoBomba: 18, veiculoEletrico: 12, bombaIncendio: 6 } },
+  },
   {
     id: 'p2', nome: 'Edifício Aurora', status: 'EM_ANALISE', cep: '50000100', logradouro: 'Av. Exemplo, 450',
     bairro: 'Boa Viagem', municipio: 'Recife', uf: 'PE', tipoEdificacao: 'Residencial multifamiliar', temVe: true, temBomba: false,

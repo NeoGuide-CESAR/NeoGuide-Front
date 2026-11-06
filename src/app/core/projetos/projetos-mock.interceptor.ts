@@ -7,6 +7,17 @@ import { ProjetoCompleto, ProjetoHttp, escreverProjetoHttp } from './projeto-htt
 import { dadosExemplo } from './dados-projeto';
 import { complementosVazios } from './dados-calculo';
 import { PROJETOS_ARTBOARDS } from './projeto-artboards.mock';
+import { Projeto, ResultadoCalculo } from './projeto.model';
+
+const PROXIMA_ETAPA = { rascunho: 'Completar cadastro', em_analise: 'Parecer da Neoenergia', aprovado: 'Nenhuma pendência', reprovado: 'Revisar dados conforme o parecer' };
+
+/** Placeholder numérico pronto apenas para cenários de demonstração já enviados. Não calcula demanda. */
+function resultadoDemonstracao(p: Projeto): ResultadoCalculo {
+  return {
+    demandaTotal: 0, calculadoEm: p.atualizadoEm.includes('T') ? p.atualizadoEm : `${p.atualizadoEm}T12:00:00-03:00`, norma: 'DIS-NOR-053',
+    porEtapa: { residencial: p.tipoEdificacao === 'Comercial' ? null : 0, areaComum: 0, comercial: p.tipoEdificacao === 'Comercial' ? 0 : null, veiculoBomba: 0, veiculoEletrico: 0, bombaIncendio: 0 },
+  };
+}
 
 /** Único mock HTTP de projetos. Dados em memória; nenhum servidor é iniciado. */
 @Injectable({ providedIn: 'root' })
@@ -30,10 +41,23 @@ export class ProjetosMockStore {
       if (completo.dados && completo.complementos) {
         this.projetos.set(p.id, escreverProjetoHttp(p as ProjetoCompleto, { dados: completo.dados, complementos: completo.complementos }));
       }
+      const atual = this.projetos.get(p.id)!;
+      if (p.status !== 'rascunho') {
+        atual.enviadoEm ??= p.enviadoEm ?? p.atualizadoEm;
+        atual.proximaEtapa ??= p.proximaEtapa ?? PROXIMA_ETAPA[p.status];
+        if (!atual.resultadoInvalidado && !atual.resultado) atual.resultado = resultadoDemonstracao(p);
+      }
     }
     for (const projeto of PROJETOS_ARTBOARDS) {
       const cache = inject(ProjetosService).projetos().find(p => p.id === projeto.id) as Partial<ProjetoCompleto> | undefined;
       if (!cache?.dados) this.projetos.set(projeto.id, structuredClone(projeto));
+      else if (projeto.id === 'p3' && cache.status === 'aprovado' && !cache.resultadoInvalidado && !cache.resultado) {
+        // Atualiza o cenário legado já aberto no navegador, preservando os dados editados no cache.
+        const atual = this.projetos.get(projeto.id)!;
+        atual.resultado = structuredClone(projeto.resultado);
+        atual.enviadoEm = projeto.enviadoEm;
+        atual.proximaEtapa = projeto.proximaEtapa;
+      }
     }
   }
 }

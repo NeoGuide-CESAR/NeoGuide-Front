@@ -3,7 +3,9 @@ import { HttpClient, HttpErrorResponse, provideHttpClient, withInterceptors } fr
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { environment } from '../../../environments/environment';
 import { ProjetosMockStore, projetosMockInterceptor } from './projetos-mock.interceptor';
-import { ProjetoHttp } from './projeto-http';
+import { ProjetoHttp, lerProjetoHttp } from './projeto-http';
+import { ProjetosService } from './projetos.service';
+import { PROJETOS_ARTBOARDS } from './projeto-artboards.mock';
 import { provideRouter } from '@angular/router';
 import { ProjetosApiService } from './projetos-api.service';
 import { DetalheProjetoPage } from '../../features/detalhe-projeto/detalhe-projeto.page';
@@ -43,6 +45,27 @@ describe('Mock HTTP US13 por flag', () => {
     http.post('/api/v1/projects/p1/duplicar', {}).subscribe();
     const req = backend.expectOne('/api/v1/projects/p1/duplicar'); expect(req.request.method).toBe('POST'); req.flush({ id: 'real' });
   });
+  it('um aprovado mostra resultado e andamento, inclusive com cache legado', fakeAsync(() => {
+    spyOn(localStorage, 'setItem');
+    const legado = lerProjetoHttp(structuredClone(PROJETOS_ARTBOARDS.find(p => p.id === 'p3')!));
+    const cacheLegado = { ...legado, nome: 'Nome preservado', dados: { ...legado.dados, nome: 'Nome preservado' }, resultado: null, enviadoEm: undefined, proximaEtapa: undefined };
+    TestBed.inject(ProjetosService).atualizar(cacheLegado);
+    http.get<ProjetoHttp>('/api/v1/projects/p3').subscribe(p => {
+      expect(p.nome).toBe('Nome preservado'); expect(p.status).toBe('APROVADO');
+      expect(p.resultado?.demandaTotal).toBe(152.4); expect(p.enviadoEm).toBeTruthy(); expect(p.proximaEtapa).toBe('Nenhuma pendência');
+    }); tick(600);
+    http.get<ProjetoHttp>('/api/v1/projects/p6').subscribe(p => {
+      expect(p.resultado).toBeTruthy(); expect(p.enviadoEm).toBeTruthy(); expect(p.proximaEtapa).toBe('Nenhuma pendência');
+    }); tick(600);
+  }));
+  it('não restaura resultado de um projeto editado que exige recálculo', fakeAsync(() => {
+    spyOn(localStorage, 'setItem');
+    const editado = lerProjetoHttp(structuredClone(PROJETOS_ARTBOARDS.find(p => p.id === 'p3')!));
+    TestBed.inject(ProjetosService).atualizar({ ...editado, status: 'rascunho', resultado: null, resultadoInvalidado: true });
+    http.get<ProjetoHttp>('/api/v1/projects/p3').subscribe(p => {
+      expect(p.status).toBe('RASCUNHO'); expect(p.resultado).toBeNull(); expect(p.resultadoInvalidado).toBeTrue();
+    }); tick(600);
+  }));
   it('o detalhamento não repete GET quando o mock inicializa a carteira', fakeAsync(() => {
     spyOn(localStorage, 'setItem');
     const obter = spyOn(TestBed.inject(ProjetosApiService), 'obter').and.callThrough();

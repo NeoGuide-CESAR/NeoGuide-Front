@@ -8,6 +8,7 @@ Execute `npm start` em `NeoGuide-Front` e use o acesso simulado já existente:
 
 - `/projetos/p2`: Edifício Aurora, com os grupos 20 × 70 m² e 12 × 95 m², loja de 90 m² e quatro pontos de carregamento.
 - `/projetos/p1/resultado`: Residencial Jardim, com três grupos, três espaços comerciais, seis pontos e uma motobomba de 15 cv.
+- `/projetos/p3`: Residencial Boa Viagem aprovado, com envio registrado e resultado ilustrativo de 152,4 kVA; o link “Ver resultado completo” abre `/projetos/p3/resultado`.
 - `/projetos/nao-existe`: estado de projeto não encontrado.
 - Outros projetos da carteira sem resultado mostram o estado “Resultado ainda não disponível”.
 
@@ -16,7 +17,7 @@ No mobile, conferir o menu, os botões com largura total, a demanda antes dos da
 ## Validação
 
 - `npm run lint`: aprovado.
-- `npm test -- --watch=false --browsers=ChromeHeadless`: 78 testes aprovados, sem Cypress.
+- `npm test -- --watch=false --browsers=ChromeHeadless`: 80 testes aprovados, sem Cypress.
 - `npm run build`: aprovado, sem warnings novos. Permanecem os quatro avisos anteriores de orçamento de CSS de login, home, listagem e widget Neo.
 - Conferência visual no navegador: detalhamento, resultado, navegação entre telas, menu mobile, demanda antes dos dados, tabela com rolagem interna e estado de projeto não encontrado.
 
@@ -28,6 +29,7 @@ No mobile, conferir o menu, os botões com largura total, a demanda antes dos da
 - Os estilos inline das referências foram convertidos para classes SCSS com os tokens existentes e os tokens complementares medidos nos próprios artboards. Não foram usadas sombras, novas fontes ou cores fora dessas referências.
 - A fonte continua IberPangea Text com fallback Figtree; o arquivo proprietário da IberPangea não está no repositório.
 - O front não calcula demanda. Total e valores por etapa chegam prontos no DTO, inclusive o subtotal de veículo elétrico e bomba. Os placeholders do moodboard foram representados por números zero e formatados pelo pipe `kva`, resultando em `0,0 kVA`.
+- O cenário Boa Viagem usa números ilustrativos fixos para demonstrar um aprovado com resultado. Os demais mocks já enviados recebem resultado demonstrativo e andamento coerente; rascunhos e resultados invalidados não são tratados como calculados. O cache legado do exemplo aprovado é atualizado sem apagar dados editados.
 - As datas são formatadas como dd/MM/yyyy e HH:mm, com offset -03:00 para manter a exibição consistente em São Paulo.
 - Os dados comerciais existentes são exibidos mesmo quando o tipo da edificação é residencial, conforme ocorre no artboard do Aurora. Nenhuma entrada é descartada silenciosamente pelo front.
 - Um resultado invalidado não é apresentado como “Calculado”. Dados ausentes e partes não aplicáveis são estados distintos.
