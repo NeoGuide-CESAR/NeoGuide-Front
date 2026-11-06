@@ -27,12 +27,8 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./features/meus-projetos/meus-projetos.page').then((m) => m.MeusProjetosPage),
   },
-  {
-    path: 'projetos/:id',
-    title: 'Detalhamento do projeto · NeoGuide',
-    canActivate: [authGuard],
-    loadComponent: () => import('./features/detalhe-projeto/detalhe-projeto.page').then(m => m.DetalheProjetoPage),
-  },
+  // "Abrir projeto" leva ao cálculo do projeto
+  { path: 'projetos/:id', pathMatch: 'full', redirectTo: 'projetos/:id/calculo' },
   {
     path: 'projetos/:id/calculo',
     title: 'Cálculo de Demanda · NeoGuide',

@@ -13,7 +13,6 @@ export interface Projeto {
   criadoEm?: string; // ISO 8601
   enviadoEm?: string; // ISO 8601; ausente em rascunhos
   proximaEtapa?: string;
-  resultadoInvalidado?: boolean;
 }
 
 export interface ResumoProjetos {

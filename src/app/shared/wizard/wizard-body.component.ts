@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Injector, ViewChild, afterNextRender, computed, effect, inject, input, isDevMode, output, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewChild, computed, effect, input, isDevMode, output, signal } from '@angular/core';
 import { DadosProjetoFormComponent } from './dados-projeto-form.component';
 import { DadosProjeto, EstadoCep, TIPOS_EDIFICACAO, TipoEdificacao, dadosVazios, etapasAplicaveis } from '../../core/projetos/dados-projeto';
 import { ComplementosCalculo, RascunhoCalculo, complementosVazios, errosCalculo } from '../../core/projetos/dados-calculo';
@@ -29,35 +29,17 @@ export class WizardBodyComponent {
   readonly rascunhoAlterado = output<RascunhoCalculo>();
   readonly revisaoConcluida = signal(false);
   readonly etapasVisitadas = signal<number[]>([0]);
-  private readonly injector = inject(Injector);
-  readonly aguardandoPersistencia = signal(false);
-  private aposPersistir?: () => void;
-  confirmarPersistencia(sucesso: boolean): void {
-    const continuar = this.aposPersistir;
-    this.aposPersistir = undefined;
-    this.aguardandoPersistencia.set(false);
-    if (sucesso) continuar?.();
-  }
-  private persistir(continuar: () => void): void {
-    if (this.aguardandoPersistencia()) return;
-    this.aposPersistir = continuar;
-    this.aguardandoPersistencia.set(true);
+  private persistenciaConfirmada = false;
+  confirmarPersistencia(sucesso: boolean): void { this.persistenciaConfirmada = sucesso; }
+  private persistir(): boolean {
+    this.persistenciaConfirmada = false;
     this.rascunhoAlterado.emit({ dados: this.dadosAtuais(), complementos: this.complementos() });
-  }
-  focarCep(): void {
-    this.etapaSelecionada.set(0);
-    afterNextRender(() => this.formulario?.focar('cep'), { injector: this.injector });
+    return this.persistenciaConfirmada;
   }
   readonly errosComplementares = computed(() => errosCalculo(this.dadosAtuais(), this.complementos()));
   readonly podeConcluir = computed(() => this.formularioValido() && !this.errosComplementares().length);
   constructor() {
     effect(() => { this.complementos.set(structuredClone(this.complementosIniciais())); }, { allowSignalWrites: true });
-    effect(() => {
-      this.dadosIniciais(); this.complementosIniciais();
-      this.etapasVisitadas.set(untracked(this.edicao) ? [0, 1, 2, 3, 4] : [0]);
-      this.etapaSelecionada.set(null);
-      this.revisaoConcluida.set(false);
-    }, { allowSignalWrites: true });
   }
   readonly titulo = input('Novo projeto');
   readonly subtitulo = input('Comece pelos dados da edificação. As próximas etapas dependem do que você marcar aqui.');
@@ -66,7 +48,6 @@ export class WizardBodyComponent {
   readonly etapaInicial = input(0);
   readonly dadosIniciais = input<DadosProjeto>(dadosVazios());
   readonly edicao = input(false);
-  readonly rotuloStatus = input('Rascunho');
   readonly salvando = input(false);
   readonly erroSalvamento = input('');
   readonly mensagemSalvamento = input('');
@@ -75,7 +56,6 @@ export class WizardBodyComponent {
   readonly concluir = output<void>();
   readonly salvarProjeto = output<DadosProjeto>();
   readonly dadosAtuais = signal(dadosVazios());
-  readonly dadosAlterados = output<DadosProjeto>();
   readonly formularioValido = signal(false);
   private readonly etapaSelecionada = signal<number | null>(null);
   readonly etapaAtual = computed(() => this.etapaSelecionada() ?? this.etapaInicial());
@@ -90,7 +70,6 @@ export class WizardBodyComponent {
   ];
   receberDados(evento: { dados: DadosProjeto; valido: boolean }): void {
     this.dadosAtuais.set(evento.dados); this.formularioValido.set(evento.valido);
-    this.dadosAlterados.emit(evento.dados);
     this.revisaoConcluida.set(false);
     if (!this.etapaLiberada(this.etapaAtual())) this.etapaSelecionada.set(0);
   }
@@ -131,13 +110,15 @@ export class WizardBodyComponent {
     }
     if (this.ehUltimaEtapa()) {
       if (this.podeConcluir()) {
-        this.persistir(() => { this.revisaoConcluida.set(true); this.concluir.emit(); });
+        if (!this.persistir()) return;
+        this.revisaoConcluida.set(true); this.concluir.emit();
       }
       return;
     }
     if (!this.complementares?.validar()) return;
     this.etapasVisitadas.update(v => [...new Set([...v, this.etapaAtual()])]);
-    this.persistir(() => this.confirmarSalvamento());
+    if (!this.persistir()) return;
+    this.confirmarSalvamento();
   }
   confirmarSalvamento(): void {
     this.avancar.emit(this.etapaAtiva().id);

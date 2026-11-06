@@ -1,27 +1,18 @@
 <app-site-header [links]="links"><a class="usuario" routerLink="/inicio"><span class="ms" aria-hidden="true">account_circle</span>{{ auth.usuario()?.nome || 'Meu perfil' }}<span class="ms" aria-hidden="true">expand_more</span></a></app-site-header>
-@if (carregando()) { <p class="aviso" role="status">Carregando projeto…</p> }
-@else if (indisponivel()) {
-  <div class="aviso" role="alert"><p>{{ erro() }}</p><a routerLink="/meus-projetos">Voltar para Meus Projetos</a></div>
-} @else {
-  @if (avisoResultado()) { <p class="aviso" role="status">{{ avisoResultado() }}</p> }
-  <app-wizard-body
-    titulo="Novo projeto"
-    [subtitulo]="original() ? 'Todas as informações do projeto original já estão preenchidas. Altere o que precisar em cada etapa.' : 'Comece pelos dados da edificação. As próximas etapas dependem do que você marcar aqui.'"
-    [breadcrumb]="breadcrumbWizard()" [dadosIniciais]="dados()" [complementosIniciais]="complementos()"
-    [edicao]="edicao()" [rotuloStatus]="statusInfo[projeto()?.status || 'rascunho'].rotulo"
-    [salvando]="salvando() || desfazendo() || confirmandoEndereco()"
-    [erroSalvamento]="erro()" [mensagemSalvamento]="mensagem()"
-    (salvarProjeto)="salvar($event)" (rascunhoAlterado)="salvarAutomatico($event)"
-    (cancelar)="cancelar()" (concluir)="concluir()"
-  />
-}
-<dialog #dialogoEndereco class="dialogo-endereco" aria-labelledby="titulo-endereco" aria-describedby="texto-endereco" (cancel)="cancelarEndereco($event)">
-  <h2 id="titulo-endereco">O endereço é o mesmo do projeto original</h2>
-  <p id="texto-endereco">Esta cópia está com o mesmo endereço de {{ original()?.nome }}. Se o novo projeto é para outro local, altere o endereço antes de salvar.</p>
-  <div class="dialogo-acoes">
-    <button #alterarEndereco type="button" class="ng-btn ng-btn--contorno" autofocus (click)="cancelarEndereco()">ALTERAR ENDEREÇO</button>
-    <button type="button" class="ng-btn ng-btn--primario" (click)="manterEndereco()">MANTER ENDEREÇO</button>
-  </div>
-</dialog>
+
+<app-wizard-body
+  titulo="Novo projeto"
+  subtitulo="Comece pelos dados da edificação. As próximas etapas dependem do que você marcar aqui."
+  [breadcrumb]="breadcrumbWizard()"
+  [dadosIniciais]="dados()"
+  [complementosIniciais]="complementos()"
+  [edicao]="edicao()"
+  [salvando]="salvando()"
+  [erroSalvamento]="erro()"
+  [mensagemSalvamento]="mensagem()"
+  (salvarProjeto)="salvar($event)"
+  (rascunhoAlterado)="salvarAutomatico($event)"
+  (cancelar)="cancelar()"
+  (concluir)="concluir()"
+/>
 <app-site-footer />
-<app-snackbar />
