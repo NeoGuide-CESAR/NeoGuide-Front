@@ -111,8 +111,8 @@
                     <button type="button" class="ng-btn ng-btn--primario botao-36" (click)="abrirProjeto(p.id)">
                       <span class="ms" aria-hidden="true">open_in_new</span> ABRIR PROJETO
                     </button>
-                    <button type="button" class="ng-btn ng-btn--contorno botao-36" (click)="duplicar(p)">
-                      <span class="ms" aria-hidden="true">content_copy</span> DUPLICAR
+                    <button type="button" class="ng-btn ng-btn--contorno botao-duplicar" [disabled]="!!duplicacao.duplicando()" (click)="duplicacao.executar(p.id, $event)">
+                      <span class="ms" aria-hidden="true">content_copy</span> {{ duplicacao.duplicando() === p.id ? 'DUPLICANDO…' : 'DUPLICAR' }}
                     </button>
                     @if (p.status === 'rascunho') {
                       <button type="button" class="acao-excluir" (click)="pedirExclusao(p)">

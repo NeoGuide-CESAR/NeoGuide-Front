@@ -1,0 +1,27 @@
+<app-site-header [links]="links" />
+<main>
+  <nav aria-label="Breadcrumb"><a routerLink="/meus-projetos">Meus Projetos</a> &gt; <span aria-current="page">Detalhamento do projeto</span></nav>
+  @if (projeto(); as p) {
+    <header><div><h1>{{ p.nome }}</h1><p>{{ statusInfo[p.status].rotulo }}</p></div>
+      <div class="acoes">
+        <button type="button" class="ng-btn botao-duplicar" [disabled]="!!duplicacao.duplicando()" (click)="duplicacao.executar(p.id, $event)"><span class="ms" aria-hidden="true">content_copy</span> {{ duplicacao.duplicando() === p.id ? 'DUPLICANDO…' : 'DUPLICAR' }}</button>
+        <a class="ng-btn ng-btn--primario" [routerLink]="['/projetos', p.id, 'calculo']"><span class="ms" aria-hidden="true">edit</span> EDITAR</a>
+      </div>
+    </header>
+    <section class="ng-card" aria-labelledby="dados-projeto">
+      <h2 id="dados-projeto">Dados do projeto</h2>
+      <dl>
+        <div><dt>Tipo de edificação</dt><dd>{{ p.tipoEdificacao || '—' }}</dd></div>
+        <div><dt>Endereço</dt><dd>{{ p.endereco || '—' }}</dd></div>
+        <div><dt>Unidades consumidoras</dt><dd>{{ p.unidadesConsumidoras ?? '—' }}</dd></div>
+        <div><dt>Atualizado em</dt><dd>{{ p.atualizadoEm | date:'dd/MM/yyyy' }}</dd></div>
+      </dl>
+      @if (p.resultadoInvalidado) { <p role="status">O resultado anterior foi invalidado. Revise os dados e recalcule o projeto.</p> }
+      @if (erro()) { <p role="alert">{{ erro() }}</p> }
+    </section>
+  } @else if (carregando()) { <p role="status">Carregando projeto…</p> }
+  @else { <h1>Projeto não encontrado</h1><p role="alert">{{ erro() }}</p> }
+  <a class="voltar" routerLink="/meus-projetos">Voltar para Meus Projetos</a>
+</main>
+<app-site-footer />
+<app-snackbar />

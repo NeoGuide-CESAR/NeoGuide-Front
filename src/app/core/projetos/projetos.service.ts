@@ -10,17 +10,34 @@ import { Projeto, ResumoProjetos } from './projeto.model';
 const LATENCIA_SIMULADA = 300;
 
 /**
- * Dados SIMULADOS. Quando a API existir, troque `listar`, `duplicar` e `excluir`
- * por chamadas HTTP (ex.: GET /api/projetos com os parâmetros da listagem)
- * e mantenha o mesmo contrato.
+ * Carteira e listagem simuladas preexistentes. O fluxo HTTP de US13 fica em
+ * ProjetosApiService; só atualiza esta carteira depois de uma resposta de sucesso.
  */
 @Injectable({ providedIn: 'root' })
 export class ProjetosService {
   private readonly _projetos = signal<Projeto[]>(
-    PROJETOS_MOCK.map((p) => ({ ...p, enviadoEm: p.status === 'rascunho' ? undefined : p.atualizadoEm })),
+    this.carregar(),
   );
 
   readonly projetos = this._projetos.asReadonly();
+
+  private carregar(): Projeto[] {
+    try {
+      const salvo = localStorage.getItem('neoguide.projetos');
+      if (salvo) {
+        const lista: unknown = JSON.parse(salvo);
+        if (Array.isArray(lista) && lista.every(p => p && typeof p.id === 'string' && typeof p.nome === 'string' && ['rascunho', 'em_analise', 'aprovado', 'reprovado'].includes(p.status))) return lista;
+      }
+    } catch { /* Armazenamento indisponível: mantém a demonstração acessível. */ }
+    return PROJETOS_MOCK.map(p => ({ ...p, enviadoEm: p.status === 'rascunho' ? undefined : p.atualizadoEm }));
+  }
+
+  atualizar(projeto: Projeto): void {
+    const anterior = this._projetos().find(p => p.id === projeto.id);
+    const lista = [{ ...anterior, ...projeto }, ...this._projetos().filter(p => p.id !== projeto.id)];
+    this._projetos.set(lista);
+    try { localStorage.setItem('neoguide.projetos', JSON.stringify(lista)); } catch { /* Cache opcional: a resposta HTTP já confirmou a operação. */ }
+  }
 
   readonly recentes = computed(() =>
     [...this._projetos()]
@@ -44,27 +61,12 @@ export class ProjetosService {
     return defer(() => of(calcularListagem(this._projetos(), parametros))).pipe(delay(LATENCIA_SIMULADA));
   }
 
-  /** Cria uma cópia em rascunho no topo da lista e devolve o id da cópia. */
-  duplicar(id: string): string | null {
-    const original = this._projetos().find((p) => p.id === id);
-    if (!original) return null;
-    const hoje = new Date().toISOString().slice(0, 10);
-    const copia: Projeto = {
-      ...original,
-      id: `${original.id}-copia-${Date.now()}`,
-      nome: `Cópia de ${original.nome}`,
-      status: 'rascunho',
-      atualizadoEm: hoje,
-      criadoEm: hoje,
-      enviadoEm: undefined,
-      etapaAtual: undefined,
-      totalEtapas: undefined,
-    };
-    this._projetos.update((lista) => [copia, ...lista]);
-    return copia.id;
-  }
-
   excluir(id: string): void {
-    this._projetos.update((lista) => lista.filter((p) => p.id !== id));
+    const lista = this._projetos().filter(p => p.id !== id);
+    this._projetos.set(lista);
+    try {
+      localStorage.setItem('neoguide.projetos', JSON.stringify(lista));
+      localStorage.removeItem(`neoguide.rascunho.${id}`);
+    } catch { /* Sem cache, mantém o sucesso confirmado pelo servidor. */ }
   }
 }
