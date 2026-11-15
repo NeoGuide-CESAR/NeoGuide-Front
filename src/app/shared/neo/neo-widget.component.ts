@@ -117,6 +117,12 @@ export class NeoWidgetComponent {
     }
   }
 
+  /** Evita o submit nativo do <form>, que recarregaria a página e perderia a conversa. */
+  aoEnviarFormulario(evento: Event): void {
+    evento.preventDefault();
+    this.enviar();
+  }
+
   enviar(): void {
     if (!this.podeEnviar()) return;
     this.estado.enviar(this.rascunho());

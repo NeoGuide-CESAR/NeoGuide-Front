@@ -1,113 +1,133 @@
-import { Injectable } from '@angular/core';
-import { Observable, defer, of, throwError } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
-import { ConversaCompleta, ConversaResumo, Mensagem, PedidoNeo, RespostaNeo } from './neo.model';
+import { ConversaCompleta, ConversaResumo, FonteNeo, Mensagem, PedidoNeo, RespostaNeo } from './neo.model';
 
-const LATENCIA_RESPOSTA = 900;
-const LATENCIA_CONSULTA = 200;
+/** Prefixo do proxy (ng serve) que encaminha para a API Lumi. A chave X-API-Key fica no proxy, não aqui. */
+const BASE = '/api/neo';
 
-/** Resposta de exemplo; o conteúdo real da norma vem do back-end. */
-interface RespostaExemplo {
-  resposta: string;
-  fontes: { documento: string; secao: string }[];
-  semFonte: boolean;
+/** Formato da API Lumi (NeoGuide-NeoChat, docs/05-ARQUITETURA.md). */
+interface FonteLumi {
+  document_code: string;
+  revision: string;
+  section: string;
+  page: number;
+  relevance_score: number;
+  snippet: string;
+}
+
+interface SessaoCriadaLumi {
+  id: string;
+  created_at: string;
+}
+
+interface RespostaChatLumi {
+  session_id: string;
+  response: string;
+  sources: FonteLumi[];
+  created_at: string;
+}
+
+interface MensagemLumi {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  sources: FonteLumi[];
+  created_at: string;
+}
+
+interface SessaoDetalheLumi {
+  id: string;
+  updated_at: string;
+  messages: MensagemLumi[];
 }
 
 /**
- * Serviço SIMULADO do Neo (contrato com o back-end ainda não definido).
- * As respostas são placeholders para testar a interface; não são conteúdo da DIS-NOR-053.
+ * Cliente da API Lumi para o Neo.
+ * Sessões e mensagens vêm do back-end. A Lumi ainda não tem listagem nem exclusão de sessões,
+ * então `listarConversas` e `excluirConversa` são provisórios (ver comentários).
  */
 @Injectable({ providedIn: 'root' })
 export class NeoService {
-  private readonly conversas: ConversaCompleta[] = this.semearConversas();
-  private contador = 0;
+  private readonly http = inject(HttpClient);
 
+  /**
+   * Envia a pergunta. Se não houver sessão, cria uma antes.
+   * Se a sessão tiver expirado (404/410, TTL de inatividade), abre outra e reenvia uma vez.
+   */
   enviarMensagem(pedido: PedidoNeo): Observable<RespostaNeo> {
-    return defer(() => {
-      const conversa = this.conversas.find((c) => c.id === pedido.conversaId) ?? this.criarConversa(pedido);
-      const exemplo = responderExemplo(pedido.mensagem);
-      conversa.mensagens.push(
-        { id: this.novoId(), autor: 'usuario', texto: pedido.mensagem },
-        { id: this.novoId(), autor: 'neo', texto: exemplo.resposta, fontes: exemplo.fontes, semFonte: exemplo.semFonte },
-      );
-      conversa.atualizadaEm = new Date().toISOString();
-      return of({ conversaId: conversa.id, resposta: exemplo.resposta, fontes: exemplo.fontes, semFonte: exemplo.semFonte });
-    }).pipe(delay(LATENCIA_RESPOSTA));
+    const enviar = (sessionId: string) =>
+      this.http
+        .post<RespostaChatLumi>(`${BASE}/chat`, { session_id: sessionId, message: pedido.mensagem, stream: false })
+        .pipe(map((r) => this.paraResposta(r)));
+
+    if (!pedido.conversaId) {
+      return this.criarSessao().pipe(switchMap((id) => enviar(id)));
+    }
+
+    return enviar(pedido.conversaId).pipe(
+      catchError((erro: unknown) => {
+        if (erro instanceof HttpErrorResponse && (erro.status === 404 || erro.status === 410)) {
+          return this.criarSessao().pipe(switchMap((id) => enviar(id)));
+        }
+        return throwError(() => erro);
+      }),
+    );
   }
 
+  /** TODO: a Lumi não tem GET /sessions (listagem). Até lá, o histórico fica vazio. */
   listarConversas(): Observable<ConversaResumo[]> {
-    return defer(() =>
-      of(
-        this.conversas
-          .map((c) => ({ id: c.id, titulo: c.titulo, atualizadaEm: c.atualizadaEm, projetoId: c.projetoId }))
-          .sort((a, b) => b.atualizadaEm.localeCompare(a.atualizadaEm)),
-      ),
-    ).pipe(delay(LATENCIA_CONSULTA));
+    return of([]);
   }
 
   abrirConversa(id: string): Observable<ConversaCompleta> {
-    const conversa = this.conversas.find((c) => c.id === id);
-    if (!conversa) return throwError(() => new Error('Conversa não encontrada.'));
-    return of({ ...conversa, mensagens: [...conversa.mensagens] }).pipe(delay(LATENCIA_CONSULTA));
+    return this.http.get<SessaoDetalheLumi>(`${BASE}/sessions/${id}`).pipe(
+      map((s) => {
+        const mensagens = s.messages.map((m): Mensagem => this.paraMensagem(m));
+        const primeira = mensagens.find((m) => m.autor === 'usuario');
+        return {
+          id: s.id,
+          titulo: primeira ? primeira.texto.slice(0, 60) : 'Conversa',
+          atualizadaEm: s.updated_at,
+          mensagens,
+        };
+      }),
+    );
   }
 
-  excluirConversa(id: string): Observable<void> {
-    const indice = this.conversas.findIndex((c) => c.id === id);
-    if (indice >= 0) this.conversas.splice(indice, 1);
-    return of(undefined).pipe(delay(LATENCIA_CONSULTA));
+  /** TODO: a Lumi não tem DELETE de sessão. Hoje só limpa a tela; a conversa continua no banco. */
+  excluirConversa(_id: string): Observable<void> {
+    return of(undefined);
   }
 
-  private criarConversa(pedido: PedidoNeo): ConversaCompleta {
-    const conversa: ConversaCompleta = {
-      id: `c-${this.novoId()}`,
-      titulo: pedido.mensagem.slice(0, 60),
-      atualizadaEm: new Date().toISOString(),
-      projetoId: pedido.projetoId,
-      mensagens: [],
-    };
-    this.conversas.push(conversa);
-    return conversa;
+  private criarSessao(): Observable<string> {
+    return this.http.post<SessaoCriadaLumi>(`${BASE}/sessions`, {}).pipe(map((s) => s.id));
   }
 
-  private novoId(): string {
-    return `${++this.contador}-${Date.now()}`;
-  }
-
-  private semearConversas(): ConversaCompleta[] {
-    const dia = (dias: number) => new Date(Date.now() - dias * 86_400_000).toISOString();
-    const msg = (autor: Mensagem['autor'], texto: string): Mensagem => ({ id: `seed-${Math.random()}`, autor, texto });
-    return [
-      { id: 'seed-1', titulo: 'Como converto cv em kVA?', atualizadaEm: dia(0), projetoId: 'p1', mensagens: [msg('usuario', 'Como converto cv em kVA?'), msg('neo', 'Exemplo de resposta.')] },
-      { id: 'seed-2', titulo: 'Carga reserva entra na demanda?', atualizadaEm: dia(3), mensagens: [msg('usuario', 'Carga reserva entra na demanda?'), msg('neo', 'Exemplo de resposta.')] },
-      { id: 'seed-3', titulo: 'Fator de demanda residencial', atualizadaEm: dia(20), mensagens: [msg('usuario', 'Fator de demanda residencial'), msg('neo', 'Exemplo de resposta.')] },
-    ];
-  }
-}
-
-function normalizar(texto: string): string {
-  return texto.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
-}
-
-function responderExemplo(texto: string): RespostaExemplo {
-  const t = normalizar(texto);
-  if (/\bcv\b|\bkva\b/.test(t)) {
+  private paraResposta(r: RespostaChatLumi): RespostaNeo {
     return {
-      resposta: 'Para converter cv em kVA, use o fator indicado na tabela de conversão da norma.',
-      fontes: [{ documento: 'DIS-NOR-030', secao: 'Tabela 10' }],
-      semFonte: false,
+      conversaId: r.session_id,
+      resposta: r.response,
+      fontes: this.paraFontes(r.sources),
+      semFonte: r.sources.length === 0,
     };
   }
-  if (t.includes('reserva')) {
+
+  private paraMensagem(m: MensagemLumi): Mensagem {
+    if (m.role === 'user') return { id: m.id, autor: 'usuario', texto: m.content };
+    if (m.role === 'system') return { id: m.id, autor: 'sistema', texto: m.content };
     return {
-      resposta: 'A carga reserva segue a regra de cálculo da norma. Confira o detalhamento na seção de cargas.',
-      fontes: [{ documento: 'DIS-NOR-053', secao: 'Cargas reserva' }],
-      semFonte: false,
+      id: m.id,
+      autor: 'neo',
+      texto: m.content,
+      fontes: this.paraFontes(m.sources),
+      semFonte: m.sources.length === 0,
     };
   }
-  return {
-    resposta: 'Não encontrei essa informação nos documentos da norma. Consulte os canais oficiais da Neoenergia para confirmar.',
-    fontes: [],
-    semFonte: true,
-  };
+
+  private paraFontes(fontes: FonteLumi[]): FonteNeo[] {
+    return fontes.map((f) => ({ documento: f.document_code, secao: f.section }));
+  }
 }
