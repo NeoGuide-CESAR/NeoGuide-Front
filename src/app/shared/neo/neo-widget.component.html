@@ -68,7 +68,7 @@
             }
           </div>
 
-          <form class="entrada" (ngSubmit)="enviar()">
+          <form class="entrada" (submit)="aoEnviarFormulario($event)">
             <label for="neo-pergunta" class="sr-only">Pergunte sobre a norma</label>
             <textarea
               #campo
