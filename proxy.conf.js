@@ -16,6 +16,11 @@ function lerChaveDoEnvDaLumi() {
 const CHAVE_LUMI = process.env.LUMI_API_KEY || lerChaveDoEnvDaLumi();
 
 module.exports = {
+  // API do back (NeoGuide-Back): /api/v1/** -> back. Porta padrão 8080; defina BACK_API_URL para outra porta.
+  '/api/v1': {
+    target: process.env.BACK_API_URL || 'http://localhost:8080',
+    changeOrigin: true,
+  },
   '/api/neo': {
     target: process.env.LUMI_API_URL || 'http://localhost:8000',
     changeOrigin: true,

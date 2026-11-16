@@ -1,4 +1,6 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
@@ -26,6 +28,8 @@ describe('NeoStateService', () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: NeoService, useValue: { enviarMensagem, listarConversas: () => of([]), abrirConversa: () => of(), excluirConversa: () => of(undefined) } },
       ],
     });
