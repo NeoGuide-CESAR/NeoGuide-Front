@@ -16,7 +16,7 @@
     @if (menuAberto()) {
       <ul id="menu-usuario" class="usuario__menu" role="menu">
         <li role="none">
-          <a role="menuitem" href="#"><span class="ms" aria-hidden="true">person</span>Meu perfil</a>
+          <a role="menuitem" routerLink="/perfil"><span class="ms" aria-hidden="true">person</span>Meu perfil</a>
         </li>
         <li role="none">
           <button role="menuitem" type="button" (click)="sair()">
@@ -88,13 +88,13 @@
         <ul class="projetos">
           @for (p of recentes(); track p.id) {
             <li>
-              <a class="projeto" href="#">
+              <a class="projeto" [routerLink]="['/projetos', p.id]">
                 <span class="projeto__nome">{{ p.nome }}</span>
                 <span class="projeto__meta">
                   <time [attr.datetime]="p.atualizadoEm">{{ p.atualizadoEm | date: 'dd/MM/yyyy' }}</time>
                   <span class="status" [attr.data-status]="p.status">
                     <span class="ms" aria-hidden="true">{{ statusInfo[p.status].icone }}</span>
-                    {{ statusInfo[p.status].rotulo }}
+                    {{ p.rotuloStatus ?? statusInfo[p.status].rotulo }}
                   </span>
                   <span class="ms projeto__seta" aria-hidden="true">chevron_right</span>
                 </span>

@@ -24,6 +24,7 @@ export interface ParametrosListagem {
   tamanho: number;
 }
 
+/** Resultado de uma página de Meus Projetos. Filtros, ordenação e paginação são feitos no servidor. */
 export interface ResultadoListagem {
   itens: Projeto[];
   /** Contagens respeitam a busca, mas não o filtro de status. */
@@ -34,60 +35,6 @@ export interface ResultadoListagem {
   totalGeral: number;
   pagina: number;
   totalPaginas: number;
-}
-
-/** Minúsculas, sem acento e com espaços normalizados, para comparar textos. */
-export function normalizarTexto(texto: string): string {
-  return texto
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .toLowerCase();
-}
-
-export function filtrarPorBusca(projetos: Projeto[], busca: string): Projeto[] {
-  const termo = normalizarTexto(busca);
-  if (!termo) return projetos;
-  return projetos.filter(
-    (p) => normalizarTexto(p.nome).includes(termo) || normalizarTexto(p.endereco ?? '').includes(termo),
-  );
-}
-
-export function ordenarProjetos(projetos: Projeto[], ordem: OrdemProjetos): Projeto[] {
-  const lista = [...projetos];
-  switch (ordem) {
-    case 'antigos':
-      return lista.sort((a, b) => a.atualizadoEm.localeCompare(b.atualizadoEm));
-    case 'az':
-      return lista.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' }));
-    default:
-      return lista.sort((a, b) => b.atualizadoEm.localeCompare(a.atualizadoEm));
-  }
-}
-
-/** Aplica busca, status, ordenação e paginação sobre a lista completa. */
-export function calcularListagem(todos: Projeto[], parametros: ParametrosListagem): ResultadoListagem {
-  const porBusca = filtrarPorBusca(todos, parametros.busca);
-
-  const totais: Record<FiltroStatus, number> = { todos: porBusca.length, rascunho: 0, em_analise: 0, aprovado: 0, reprovado: 0 };
-  for (const p of porBusca) totais[p.status]++;
-
-  const filtrados = parametros.status === 'todos' ? porBusca : porBusca.filter((p) => p.status === parametros.status);
-  const ordenados = ordenarProjetos(filtrados, parametros.ordem);
-
-  const totalPaginas = Math.max(1, Math.ceil(ordenados.length / parametros.tamanho));
-  const pagina = Math.min(Math.max(1, parametros.pagina), totalPaginas);
-  const inicio = (pagina - 1) * parametros.tamanho;
-
-  return {
-    itens: ordenados.slice(inicio, inicio + parametros.tamanho),
-    totais,
-    total: ordenados.length,
-    totalGeral: todos.length,
-    pagina,
-    totalPaginas,
-  };
 }
 
 /** Lê a query string, corrigindo valores inválidos para o padrão. */

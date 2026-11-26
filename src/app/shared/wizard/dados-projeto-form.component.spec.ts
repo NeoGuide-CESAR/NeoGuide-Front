@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Subject, of, throwError } from 'rxjs';
 import { DadosProjetoFormComponent } from './dados-projeto-form.component';
 import { WizardBodyComponent } from './wizard-body.component';
@@ -11,14 +13,14 @@ describe('Dados do projeto — regras NEO-09', () => {
     expect(etapasAplicaveis(dadosVazios(), false)).toEqual([true, false, false, false, false, false]);
     expect(etapasAplicaveis(dadosVazios(), true)).toEqual([true, false, false, false, false, false]);
   });
-  it('residencial bloqueia Comercial; Comercial bloqueia Residencial; misto libera ambos', () => {
+  it('Comercial é sempre disponível; só Residencial (tipo Comercial) e VE/bomba dependem do projeto', () => {
     const dados = dadosExemplo();
-    expect(etapasAplicaveis(dados, true)).toEqual([true, true, true, false, true, true]);
+    expect(etapasAplicaveis(dados, true)).toEqual([true, true, true, true, true, true]);
     expect(etapasAplicaveis({ ...dados, tipoEdificacao: 'Comercial' }, true)).toEqual([true, false, true, true, true, true]);
     expect(etapasAplicaveis({ ...dados, tipoEdificacao: 'Uso misto (residencial e comercial)' }, true)).toEqual([true, true, true, true, true, true]);
   });
   it('VE e bomba compartilham uma etapa; área comum e revisão seguem liberadas', () => {
-    expect(etapasAplicaveis({ ...dadosExemplo(), temVe: false, temBomba: false }, true)).toEqual([true, true, true, false, false, true]);
+    expect(etapasAplicaveis({ ...dadosExemplo(), temVe: false, temBomba: false }, true)).toEqual([true, true, true, true, false, true]);
     expect(etapasAplicaveis({ ...dadosExemplo(), temVe: false }, true)[4]).toBeTrue();
   });
   it('formata CEP e restringe UF a duas letras maiúsculas', () => {
@@ -93,7 +95,7 @@ describe('Formulário da prancheta 14', () => {
 describe('Barra de etapas e salvamento', () => {
   let fixture: ComponentFixture<WizardBodyComponent>;
   beforeEach(() => {
-    TestBed.configureTestingModule({ imports: [WizardBodyComponent], providers: [{ provide: ConsultaCepService, useValue: { consultar: () => of(null) } }] });
+    TestBed.configureTestingModule({ imports: [WizardBodyComponent], providers: [provideHttpClient(), provideHttpClientTesting(), { provide: ConsultaCepService, useValue: { consultar: () => of(null) } }] });
     fixture = TestBed.createComponent(WizardBodyComponent); fixture.detectChanges();
   });
   afterEach(() => fixture.destroy());

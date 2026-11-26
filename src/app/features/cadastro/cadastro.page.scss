@@ -1,0 +1,128 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  background: var(--ng-fundo-suave);
+  font-family: var(--ng-fonte);
+}
+
+.cadastro {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 32px 16px;
+}
+
+.cartao {
+  width: min(440px, 100%);
+  padding: 32px;
+  border: 1px solid var(--ng-borda);
+  border-radius: var(--ng-raio-card);
+  background: var(--ng-branco);
+  color: var(--ng-texto);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.titulo {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--ng-texto-3);
+}
+
+.apoio,
+.rodape,
+.dica {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ng-texto-2);
+}
+
+.rodape { text-align: center; }
+
+.rodape a { color: var(--ng-link); }
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  input {
+    height: 48px;
+    padding: 0 12px;
+    border: 1px solid var(--ng-borda-campo);
+    border-radius: var(--ng-raio-campo);
+    font: inherit;
+    color: var(--ng-texto);
+    background: var(--ng-branco);
+  }
+
+  input:focus-visible {
+    outline: 2px solid var(--ng-verde);
+    outline-offset: 2px;
+  }
+
+  &--erro input {
+    border-color: var(--ng-danger);
+    box-shadow: inset 0 0 0 1px var(--ng-danger);
+  }
+}
+
+.campo__rotulo {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.opcional {
+  font-weight: 400;
+  color: var(--ng-texto-2);
+}
+
+.campo__erro {
+  font-size: 13px;
+  color: var(--ng-danger);
+}
+
+.alerta {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 4px;
+  background: var(--ng-danger-bg);
+  color: var(--ng-danger);
+  font-size: 14px;
+}
+
+.botao {
+  height: 48px;
+  border: 0;
+  border-radius: var(--ng-raio-pill);
+  background: var(--ng-verde);
+  color: var(--ng-branco);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: progress;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ng-verde-escuro);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .botao { transition: none; }
+}

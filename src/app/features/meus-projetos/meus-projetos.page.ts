@@ -13,6 +13,7 @@ import {
   lerParametros,
   paraQueryParams,
 } from '../../core/projetos/listagem';
+import { mensagemDeErro } from '../../core/projetos/projetos.api';
 import { Projeto, STATUS_INFO, StatusProjeto } from '../../core/projetos/projeto.model';
 import { ProjetosService } from '../../core/projetos/projetos.service';
 import { SnackbarService } from '../../core/ui/snackbar.service';
@@ -70,7 +71,7 @@ export class MeusProjetosPage {
     { rotulo: 'Início', rota: '/inicio' },
     { rotulo: 'Meus Projetos', rota: '/meus-projetos' },
     { rotulo: 'Cálculo de Demanda', href: '#', submenu: true },
-    { rotulo: 'Documentos', href: '#' },
+    { rotulo: 'Documentos', rota: '/normas' },
   ];
 
   readonly chips = CHIPS;
@@ -196,15 +197,15 @@ export class MeusProjetosPage {
   }
 
   duplicar(projeto: Projeto): void {
-    const copiaId = this.projetos.duplicar(projeto.id);
-    if (!copiaId) return;
-    this.versao.update((v) => v + 1);
-    this.snackbar.mostrar('Projeto duplicado com sucesso.', {
-      rotulo: 'DESFAZER',
-      executar: () => {
-        this.projetos.excluir(copiaId);
+    this.projetos.duplicar(projeto.id).subscribe({
+      next: (copia) => {
         this.versao.update((v) => v + 1);
+        this.snackbar.mostrar('Projeto duplicado com sucesso.', {
+          rotulo: 'DESFAZER',
+          executar: () => this.excluirProjeto(copia.id, 'Cópia removida.'),
+        });
       },
+      error: (erro: unknown) => this.snackbar.mostrar(mensagemDeErro(erro, 'Não foi possível duplicar o projeto.')),
     });
   }
 
@@ -230,9 +231,18 @@ export class MeusProjetosPage {
     const projeto = this.paraExcluir();
     this.cancelarExclusao();
     if (!projeto) return;
-    this.projetos.excluir(projeto.id);
-    this.versao.update((v) => v + 1);
-    this.snackbar.mostrar('Projeto excluído.');
+    this.excluirProjeto(projeto.id, 'Projeto excluído.');
+  }
+
+  /** Exclui no back (só rascunho). Em caso de recusa, mostra o motivo que o back informou. */
+  private excluirProjeto(id: string, sucesso: string): void {
+    this.projetos.excluir(id).subscribe({
+      next: () => {
+        this.versao.update((v) => v + 1);
+        this.snackbar.mostrar(sucesso);
+      },
+      error: (erro: unknown) => this.snackbar.mostrar(mensagemDeErro(erro, 'Não foi possível excluir o projeto.')),
+    });
   }
 
   /** Mantém a busca digitada e a URL sincronizadas, sem perder o foco do campo. */

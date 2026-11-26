@@ -27,6 +27,12 @@
           <span><strong>CPF/CNPJ ou senha incorretos.</strong> {{ textoErroCredenciais }}</span>
         </div>
       }
+      @if (erroServidor(); as msg) {
+        <div class="alerta" role="alert">
+          <span class="ms" aria-hidden="true">error</span>
+          <span>{{ msg }}</span>
+        </div>
+      }
 
       <!-- CPF/CNPJ ou e-mail -->
       <div class="campo" [class.campo--erro]="mensagemDocumento() || erroCredenciais()">
@@ -92,7 +98,7 @@
       </button>
     </form>
 
-    <p class="centro">Não possui cadastro? <a href="#">Cadastre-se</a></p>
+    <p class="centro">Não possui cadastro? <a routerLink="/cadastro" (click)="fechar()">Cadastre-se</a></p>
     <hr class="divisor" />
     <p class="centro legal">Conheça aqui as nossas <a href="#">Políticas e Avisos de Privacidade</a>.</p>
   </div>

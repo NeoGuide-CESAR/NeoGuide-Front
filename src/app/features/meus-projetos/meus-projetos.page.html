@@ -91,7 +91,7 @@
                   <span class="item__data">Atualizado em {{ p.atualizadoEm | date: 'dd/MM/yyyy' }}</span>
                   <span class="selo" [attr.data-status]="p.status">
                     <span class="ms" aria-hidden="true">{{ statusInfo[p.status].icone }}</span>
-                    {{ statusInfo[p.status].rotulo }}
+                    {{ p.rotuloStatus ?? statusInfo[p.status].rotulo }}
                   </span>
                   <span class="ms item__seta" aria-hidden="true">expand_more</span>
                 </span>

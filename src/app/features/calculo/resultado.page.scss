@@ -1,0 +1,41 @@
+.cabecalho { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+.cabecalho .titulo-linha { margin-bottom: 0; }
+.acoes { display: flex; gap: 8px; }
+.faixa { margin-bottom: 16px; }
+.link { margin-left: 8px; padding: 0; border: 0; background: transparent; font: 700 13px var(--ng-fonte); text-transform: uppercase; color: var(--ng-verde-escuro); text-decoration: underline; cursor: pointer; }
+.lista-alertas { margin: 0; padding-left: 16px; list-style: disc; }
+
+/* Faixa de destaque */
+.destaque { display: flex; flex-wrap: wrap; gap: 32px; align-items: center; margin: 8px 0 0; padding: 32px; border-radius: var(--ng-raio-destaque); background: var(--ng-verde-profundo); color: var(--ng-branco); }
+.destaque__total { flex: 1 1 55%; min-width: 260px; }
+.destaque p { margin: 0; }
+.destaque__rotulo { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .8; }
+.destaque__valor { display: flex; align-items: baseline; gap: 8px; margin: 8px 0 !important; font-weight: 700; }
+.destaque__valor .num { font-size: 48px; line-height: 1; }
+.destaque__valor .un { font-size: 32px; }
+.destaque__linha { font-size: 12px; line-height: 1.6; opacity: .85; }
+.selo-mt { display: inline-block; margin-left: 4px; padding: 1px 8px; border-radius: var(--ng-raio-pill); background: var(--ng-danger); font-weight: 700; opacity: 1; }
+.destaque__minis { flex: 1 1 35%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 0; }
+.destaque__minis dt { font-size: 12px; color: var(--ng-verde-sobre-escuro); }
+.destaque__minis dd { margin: 0; font-size: 13px; font-weight: 700; }
+
+.secao-titulo { margin: 32px 0 16px; font-size: 18px; font-weight: 700; color: var(--ng-verde-escuro); }
+.pilha { display: grid; gap: 16px; }
+
+/* Cartão por etapa */
+.etapa { display: grid; grid-template-columns: 62fr 38fr; gap: 24px; align-items: start; }
+.info__rotulo { margin: 0 0 8px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ng-texto-3); }
+.nao-aplica { margin: 0; font-size: 13px; color: var(--ng-texto-3); }
+.nota { margin: 12px 0 0; font-size: 12px; color: var(--ng-texto-3); }
+
+.rodape-pagina { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-top: 32px; }
+.rodape-pagina p { margin: 0; max-width: 520px; font-size: 12px; color: var(--ng-texto-3); }
+
+@media (max-width: 767px) {
+  .cabecalho { flex-direction: column; align-items: stretch; }
+  .acoes .btn { flex: 1; padding: 0 12px; }
+  .destaque { padding: 24px; border-radius: 16px; }
+  .destaque__valor .num { font-size: 40px; }
+  .destaque__minis { grid-template-columns: 1fr; }
+  .etapa { grid-template-columns: 1fr; }
+}

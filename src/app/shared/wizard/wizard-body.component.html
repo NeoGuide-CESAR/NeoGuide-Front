@@ -24,6 +24,8 @@
           [class.stepper-botao--atual]="estadoEtapa(i) === 'atual'"
           [class.stepper-botao--concluida]="estadoEtapa(i) === 'concluida'"
           [class.stepper-botao--bloqueada]="estadoEtapa(i) === 'bloqueada'"
+          [class.stepper-botao--disponivel]="estadoEtapa(i) === 'disponivel'"
+          [class.stepper-botao--nao-aplica]="estadoEtapa(i) === 'nao-aplica'"
           [attr.aria-current]="estadoEtapa(i) === 'atual' ? 'step' : null"
           [attr.aria-disabled]="!etapaLiberada(i)"
           [disabled]="!etapaLiberada(i)"
@@ -33,18 +35,21 @@
             @switch (estadoEtapa(i)) {
               @case ('concluida') { <span class="ms">check</span> }
               @case ('bloqueada') { <span class="ms">lock</span> }
+              @case ('nao-aplica') { – }
               @default { {{ i + 1 }} }
             }
           </span>
-          <span class="stepper-rotulo">{{ etapa.label }}</span>
+          <span class="stepper-rotulo">{{ etapa.label }}@if (estadoEtapa(i) === 'nao-aplica') { <small class="stepper-sub">Não se aplica</small> }</span>
         </button>
       </li>
     }
   </ol>
-  <p class="dica">
-    <span class="ms" aria-hidden="true">{{ formularioValido() ? 'check' : 'lock' }}</span>
-    {{ formularioValido() ? 'Conclua a etapa atual para liberar a próxima; etapas não aplicáveis ao tipo de edificação ou às opções marcadas continuam bloqueadas.' : 'Preencha os campos obrigatórios abaixo para liberar as próximas etapas.' }}
-  </p>
+  @if (temEtapaBloqueada()) {
+    <p class="dica">
+      <span class="ms" aria-hidden="true">lock</span>
+      {{ etapaAtual() === 0 && !formularioValido() ? 'Preencha os campos obrigatórios abaixo para liberar as próximas etapas.' : 'Conclua a etapa atual para liberar a próxima.' }}
+    </p>
+  }
 </nav>
 
 <section class="ng-card etapa-card">
@@ -54,8 +59,7 @@
   <div class="etapa-slot">
     @if (erroSalvamento()) { <p class="erro" role="alert">{{ erroSalvamento() }}</p> }
     <div [hidden]="etapaAtual() !== 0"><app-dados-projeto-form [dados]="dadosIniciais()" (alterado)="receberDados($event)" /></div>
-    <div [hidden]="etapaAtual() === 0"><app-etapas-calculo [etapa]="etapaAtual()" [dados]="dadosAtuais()" [valores]="complementos()" [projetoValido]="formularioValido()" (alterado)="receberComplementos($event)" (editar)="irParaEtapa($event)" /></div>
-    @if (etapaAtual() === 5 && revisaoConcluida()) { <p class="dica" role="status">Revisão concluída. Seu rascunho está pronto. O cálculo de demanda ficará disponível após a conexão com o serviço de cálculo.</p> }
+    <div [hidden]="etapaAtual() === 0"><app-etapas-calculo [etapa]="etapaAtual()" [dados]="dadosAtuais()" [valores]="complementos()" [projetoValido]="formularioValido()" [abaInicial]="abaInicial()" (alterado)="receberComplementos($event)" (editar)="irParaEtapa($event)" /></div>
   </div>
 </section>
 
@@ -79,12 +83,12 @@
     <button
       type="button"
       class="ng-btn avancar"
-      [disabled]="salvando() || (ehUltimaEtapa() && (!podeConcluir() || revisaoConcluida())) || (etapaAtual() === 0 && formulario?.estadoCep() === 'buscando')"
+      [disabled]="salvando() || (etapaAtual() === 0 && formulario?.estadoCep() === 'buscando')"
       (click)="avancarEtapa()"
     >
       @if (salvando()) { Salvando… }
-      @else if (ehUltimaEtapa()) {
-        {{ revisaoConcluida() ? 'REVISÃO CONCLUÍDA' : 'SALVAR REVISÃO' }} <span class="ms" aria-hidden="true">check</span>
+      @else if (origemRevisao()) {
+        SALVAR E VOLTAR PARA A REVISÃO <span class="ms" aria-hidden="true">arrow_forward</span>
       } @else if (etapaAtual() === 0) {
         {{ edicao() ? 'SALVAR E AVANÇAR' : 'CRIAR E AVANÇAR' }} <span class="ms" aria-hidden="true">arrow_forward</span>
       } @else if (etapaAtual() === 4) {

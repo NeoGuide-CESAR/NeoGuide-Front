@@ -3,12 +3,21 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
+import { signal } from '@angular/core';
 
 import { NeoStateService } from './neo-state.service';
 import { NeoService } from './neo.service';
 import { PedidoNeo, RespostaNeo } from './neo.model';
+import { ProjetosService } from '../projetos/projetos.service';
+import { Projeto } from '../projetos/projeto.model';
 
 const SESSAO = 'neoguide.sessao';
+
+/** Projetos já carregados da API (o Neo usa o nome e a etapa do projeto da rota). */
+const PROJETOS_CARREGADOS: Projeto[] = [
+  { id: 'p2', nome: 'Condomínio Aurora', status: 'em_analise', atualizadoEm: '2026-10-22' },
+  { id: 'p3', nome: 'Residencial Boa Viagem', status: 'aprovado', atualizadoEm: '2026-09-30' },
+];
 
 describe('NeoStateService', () => {
   let estado: NeoStateService;
@@ -30,6 +39,7 @@ describe('NeoStateService', () => {
         provideRouter([]),
         provideHttpClient(),
         provideHttpClientTesting(),
+        { provide: ProjetosService, useValue: { projetos: signal(PROJETOS_CARREGADOS) } },
         { provide: NeoService, useValue: { enviarMensagem, listarConversas: () => of([]), abrirConversa: () => of(), excluirConversa: () => of(undefined) } },
       ],
     });

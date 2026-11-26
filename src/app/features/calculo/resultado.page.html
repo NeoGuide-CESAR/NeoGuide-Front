@@ -1,0 +1,128 @@
+<app-site-header [links]="links"><a class="usuario" routerLink="/perfil"><span class="ms" aria-hidden="true">account_circle</span>{{ auth.usuario()?.nome || 'Meu perfil' }}<span class="ms" aria-hidden="true">expand_more</span></a></app-site-header>
+
+<main class="conteudo">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a routerLink="/meus-projetos">Meus Projetos</a>
+    <span class="ms" aria-hidden="true">chevron_right</span>
+    <span aria-current="page">{{ nome() || 'Projeto' }}</span>
+  </nav>
+
+  <div class="cabecalho">
+    <div class="titulo-linha">
+      <h1>Resultado do cálculo</h1>
+      @if (resultado()) { <app-status-badge [tipo]="desatualizado() ? 'desatualizado' : 'calculado'" /> }
+    </div>
+    <div class="acoes">
+      <button type="button" class="btn btn--contorno" (click)="revisar()"><span class="ms" aria-hidden="true">edit</span>Revisar dados</button>
+      <button type="button" class="btn btn--escuro" [disabled]="!memorialHabilitado()" (click)="gerarMemorial()">
+        @if (gerando()) { Gerando… } @else { <span class="ms" aria-hidden="true">description</span>Gerar memorial }
+      </button>
+    </div>
+  </div>
+
+  @if (falhou()) {
+    <div class="falha" role="alert">
+      <p>Não foi possível carregar o resultado.</p>
+      <button type="button" class="btn btn--primario" (click)="carregar()">Tentar novamente</button>
+    </div>
+  } @else if (carregando()) {
+    <div class="pilha" aria-busy="true" aria-label="Carregando o resultado">
+      <app-skeleton [altura]="220" />
+      @for (n of [1, 2, 3, 4, 5]; track n) { <app-skeleton [altura]="140" /> }
+    </div>
+  } @else {
+   @if (resultado(); as r) {
+    @if (mt()) {
+      <app-alert-banner variante="erro" class="faixa">Demanda acima do limite de baixa tensão. O projeto exige atendimento em média tensão, e o memorial deste sistema não pode ser gerado.</app-alert-banner>
+    }
+    @if (desatualizado()) {
+      <app-alert-banner variante="atencao" class="faixa">
+        Você alterou etapas depois deste cálculo. Recalcule antes de gerar o memorial.
+        <button type="button" class="link" (click)="recalcular()">Recalcular</button>
+      </app-alert-banner>
+    }
+    @if (info50(); as i) { <app-alert-banner variante="info" class="faixa">{{ i.mensagem }}</app-alert-banner> }
+    @if (alertasAtencao().length) {
+      <app-alert-banner variante="atencao" class="faixa">
+        <ul class="lista-alertas">@for (a of alertasAtencao(); track a.codigo) { <li>{{ a.mensagem }}</li> }</ul>
+      </app-alert-banner>
+    }
+
+    <section class="destaque" aria-label="Demanda total do projeto">
+      <div class="destaque__total">
+        <p class="destaque__rotulo">Demanda total do projeto</p>
+        <p class="destaque__valor"><span class="num">{{ dedNumero() }}</span> <span class="un">kVA</span></p>
+        <p class="destaque__linha">Calculado em {{ dataCalculo() }} conforme a DIS-NOR-053</p>
+        <p class="destaque__linha">Demanda do QDG (sem a bomba de incêndio): {{ kva(r.resumoDemandas.dqdg) }}</p>
+        <p class="destaque__linha">Tipo de enquadramento: {{ tipoEnquadramento() }}</p>
+        <p class="destaque__linha">Fornecimento: {{ fornecimento() }} @if (mt()) { <span class="selo-mt">MT</span> }</p>
+      </div>
+      <dl class="destaque__minis">
+        @for (m of minis(); track m.rotulo) { <div><dt>{{ m.rotulo }}</dt><dd>{{ m.valor }}</dd></div> }
+      </dl>
+    </section>
+
+    <h2 class="secao-titulo">Resultado por etapa</h2>
+    <div class="pilha">
+      <app-summary-card [numero]="1" titulo="Projeto" [editavel]="false">
+        <div class="etapa">
+          <div class="info"><p class="info__rotulo">Informações preenchidas</p><app-key-value-list variante="resultado" [itens]="linhasProjeto()" /></div>
+        </div>
+      </app-summary-card>
+
+      <app-summary-card [numero]="2" titulo="Residencial" [editavel]="false">
+        <div class="etapa">
+          <div class="info"><p class="info__rotulo">Informações preenchidas</p>
+            @if (aplicaResidencial()) { <app-key-value-list variante="resultado" [itens]="linhasResidencial()" /> } @else { <p class="nao-aplica">{{ naoSeAplica }}</p> }
+          </div>
+          <app-stage-result-box [muted]="!aplicaResidencial()" [itens]="[{ descricao: 'Demanda das unidades residenciais', valor: kva(aplicaResidencial() ? r.resumoDemandas.drf : 0) }]" />
+        </div>
+      </app-summary-card>
+
+      <app-summary-card [numero]="3" titulo="Área comum" [editavel]="false">
+        <div class="etapa">
+          <div class="info"><p class="info__rotulo">Informações preenchidas</p><app-key-value-list variante="resultado" [itens]="linhasAreaComum()" /></div>
+          <app-stage-result-box [itens]="[{ descricao: 'Demanda da área comum', valor: kva(r.resumoDemandas.ds) }]" />
+        </div>
+      </app-summary-card>
+
+      <app-summary-card [numero]="4" titulo="Comercial" [editavel]="false">
+        <div class="etapa">
+          <div class="info"><p class="info__rotulo">Informações preenchidas</p>
+            @if (linhasComercial().length) { <app-key-value-list variante="resultado" [itens]="linhasComercial()" /> } @else { <p class="nao-aplica">Nenhum espaço comercial informado</p> }
+          </div>
+          <app-stage-result-box [muted]="!aplicaComercial()" [itens]="[{ descricao: 'Demanda dos espaços comerciais', valor: kva(aplicaComercial() ? r.resumoDemandas.dc : 0) }]" />
+        </div>
+      </app-summary-card>
+
+      <app-summary-card [numero]="5" titulo="Veículo elétrico e bomba de incêndio" [editavel]="false">
+        <div class="etapa">
+          <div class="info"><p class="info__rotulo">Informações preenchidas</p><app-key-value-list variante="resultado" [itens]="linhasEspeciais()" /></div>
+          <app-stage-result-box [itens]="[{ descricao: 'Demanda do carregamento de veículos', valor: kva(r.resumoDemandas.dve) }, { descricao: 'Demanda da bomba de incêndio', valor: kva(r.resumoDemandas.dmbi) }]" />
+        </div>
+      </app-summary-card>
+
+      @if (!mt() && linhasEntrada().length) {
+        <app-summary-card [numero]="6" titulo="Entrada de serviço" [editavel]="false">
+          <div class="etapa">
+            <div class="info">
+              <p class="info__rotulo">Informações calculadas</p>
+              <app-key-value-list variante="resultado" [itens]="linhasEntrada()" />
+              @if (releAjustavel()) { <p class="nota">Disjuntor com relé de sobrecorrente ajustável de 0,9 a 1,2 × In (Tabela 2, nota 6).</p> }
+            </div>
+            <app-stage-result-box rotulo="Referência" [itens]="[{ descricao: 'Tabela 2 e Tabela 3 do Anexo II da DIS-NOR-053', valor: '' }]" />
+          </div>
+        </app-summary-card>
+      }
+    </div>
+
+    <footer class="rodape-pagina">
+      <a class="btn btn--contorno" routerLink="/meus-projetos">Voltar para Meus Projetos</a>
+      <p>O NeoGuide apoia o cálculo. A responsabilidade técnica permanece com o responsável pelo projeto (ART/TRT/RRT).</p>
+    </footer>
+   }
+  }
+</main>
+
+<app-snackbar />
+<app-site-footer />

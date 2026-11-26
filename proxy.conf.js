@@ -20,6 +20,10 @@ module.exports = {
   '/api/v1': {
     target: process.env.BACK_API_URL || 'http://localhost:8080',
     changeOrigin: true,
+    // A chamada do navegador é mesma origem (página e API passam por este proxy). Sem o cabeçalho Origin,
+    // o back não aplica a checagem de CORS, que recusaria qualquer porta diferente de HOST_FRONT_END (403).
+    // ng serve (Vite) usa http-proxy: o hook é `configure`, não `onProxyReq`.
+    configure: (proxy) => proxy.on('proxyReq', (proxyReq) => proxyReq.removeHeader('origin')),
   },
   '/api/neo': {
     target: process.env.LUMI_API_URL || 'http://localhost:8000',

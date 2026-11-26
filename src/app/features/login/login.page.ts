@@ -33,11 +33,7 @@ export class LoginPage implements AfterViewInit {
   private readonly conteudos: Record<string, Conteudo> = {
     'primeiro-acesso': {
       titulo: 'Primeiro acesso',
-      texto: 'Veja como se cadastrar e começar seu primeiro projeto.\n\nO cadastro de projetistas ainda não está disponível nesta versão. Se você já possui acesso, use o botão Login na Área do Projetista.',
-    },
-    cadastro: {
-      titulo: 'Cadastro de projetista',
-      texto: 'O cadastro de novas contas ainda não está disponível nesta versão. Se você já possui acesso, use o botão Login na Área do Projetista.',
+      texto: 'Veja como se cadastrar e começar seu primeiro projeto.\n\nClique em Cadastre-se, preencha seus dados e crie sua conta. Depois disso, você entra direto na plataforma. Se você já possui acesso, use o botão Login na Área do Projetista.',
     },
     norma: {
       titulo: 'Conheça a DIS-NOR-053',
@@ -58,7 +54,7 @@ export class LoginPage implements AfterViewInit {
     contato: { titulo: 'Contato', texto: 'Os canais de contato e suporte ainda não foram configurados nesta versão.' },
     faq: {
       titulo: 'Dúvidas frequentes',
-      texto: 'Como entrar?\nUse Login na Área do Projetista. Para a equipe Neoenergia, selecione Acesso Neoenergia ou Entrar como analista.\n\nComo tirar dúvidas?\nAbra o chat do Neo no canto inferior da página. Nesta versão, ele apresenta uma resposta demonstrativa.\n\nComo criar uma conta?\nO cadastro ainda não está disponível nesta versão.',
+      texto: 'Como entrar?\nUse Login na Área do Projetista. Para a equipe Neoenergia, selecione Acesso Neoenergia ou Entrar como analista.\n\nComo tirar dúvidas?\nAbra o chat do Neo no canto inferior da página. Nesta versão, ele apresenta uma resposta demonstrativa.\n\nComo criar uma conta?\nClique em Cadastre-se e preencha seus dados.',
     },
     privacidade: { titulo: 'Políticas e Avisos de Privacidade', texto: 'O documento oficial de privacidade ainda não foi disponibilizado. Ele precisa ser incluído antes da publicação do serviço.' },
   };

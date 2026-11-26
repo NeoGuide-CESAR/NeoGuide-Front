@@ -1,0 +1,67 @@
+.btn--sm { height: 36px; padding: 0 20px; font-size: 12px; }
+.btn--sm .ms { font-size: 18px; }
+
+.cabecalho { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }
+.cabecalho .titulo-linha { margin-bottom: 4px; }
+.atualizado { margin: 0; font-size: 12px; color: var(--ng-texto-3); }
+.acoes { display: flex; gap: 8px; }
+.aviso { margin-bottom: 16px; }
+.giro { width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: gira .8s linear infinite; }
+@keyframes gira { to { transform: rotate(360deg); } }
+
+.colunas { display: grid; grid-template-columns: 62fr 38fr; gap: 24px; align-items: start; }
+.coluna { display: grid; gap: 16px; min-width: 0; }
+
+.cartao { padding: 24px; background: var(--ng-branco); border: 1px solid var(--ng-borda); border-radius: var(--ng-raio-card); }
+.cartao h2 { margin: 0 0 16px; font-size: 16px; font-weight: 700; color: var(--ng-verde-profundo); }
+
+/* Informações por etapa */
+.secao + .secao { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--ng-borda); }
+.secao h3 { margin: 0 0 8px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ng-verde); }
+.secao p { margin: 0; font-size: 13px; line-height: 1.6; color: var(--ng-texto); }
+.secao p + p { margin-top: 4px; }
+.categoria { color: var(--ng-texto-3); }
+.sep { color: var(--ng-texto-3); }
+.nao-aplica { font-weight: 400; color: var(--ng-texto-3); }
+.pendente { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.selo-pendente { display: inline-flex; align-items: center; height: 22px; padding: 0 10px; border-radius: var(--ng-raio-pill); background: var(--ng-areia); font-size: 11px; font-weight: 500; color: var(--ng-texto-3); }
+.link { padding: 0; border: 0; background: transparent; font: 700 13px var(--ng-fonte); color: var(--ng-link); text-decoration: underline; cursor: pointer; }
+.smart { margin-top: 12px !important; color: var(--ng-texto-3) !important; }
+.smart strong { color: var(--ng-texto); }
+.rolagem { overflow-x: auto; border: 1px solid var(--ng-borda); border-radius: var(--ng-raio-alerta); }
+table { width: 100%; min-width: 360px; border-collapse: collapse; text-align: left; font-size: 13px; }
+th { height: 32px; padding: 0 12px; background: var(--ng-creme); font-size: 11px; font-weight: 500; color: var(--ng-texto-3); }
+td { height: 36px; padding: 0 12px; color: var(--ng-texto); border-top: 1px solid var(--ng-borda); }
+
+/* Demanda total */
+.cartao--demanda { background: var(--ng-creme); border-radius: var(--ng-raio-destaque); }
+.rotulo-demanda { display: flex; align-items: center; gap: 8px; margin: 0 0 8px !important; font-size: 11px !important; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ng-texto-3) !important; }
+.valor { margin: 0 0 8px; font-weight: 700; color: var(--ng-verde-profundo); display: flex; align-items: baseline; gap: 6px; }
+.valor .num { font-size: 36px; line-height: 1; }
+.valor .un { font-size: 28px; }
+.detalhe { margin: 0 0 4px; font-size: 12px; color: var(--ng-texto-3); }
+.detalhe--mt { color: var(--ng-danger); font-weight: 700; }
+.sem-calculo { margin: 0 0 16px; font-size: 16px; font-weight: 500; color: var(--ng-texto-3); }
+.recalcular { margin-top: 12px; }
+.ver-resultado { display: inline-flex; align-items: center; gap: 4px; margin-top: 12px; font-size: 13px; font-weight: 700; color: var(--ng-verde); text-decoration: none; }
+.ver-resultado:hover { text-decoration: underline; }
+.ver-resultado:focus-visible { outline: 2px solid var(--ng-link); outline-offset: 2px; }
+.ver-resultado .ms { font-size: 18px; }
+
+.voltar { margin-top: 8px; }
+.falha h1 { font-size: 24px; }
+.esqueleto { display: grid; gap: 24px; }
+
+@media (max-width: 767px) {
+  .colunas { grid-template-columns: 1fr; gap: 16px; }
+  /* Ordem no celular: cabeçalho, botões, demanda, andamento, dados, informações. */
+  .coluna { display: contents; }
+  .cartao--demanda { order: 1; }
+  .coluna--dir .cartao:not(.cartao--demanda) { order: 2; }
+  .coluna--esq .cartao:nth-of-type(1) { order: 3; }
+  .coluna--esq .cartao:nth-of-type(2) { order: 4; }
+  .voltar { order: 5; }
+  .cabecalho { flex-direction: column; align-items: stretch; }
+  .acoes .btn { flex: 1; }
+  .cartao { padding: 16px; }
+}

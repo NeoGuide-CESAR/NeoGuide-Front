@@ -1,0 +1,56 @@
+.btn--sm { height: 36px; padding: 0 20px; font-size: 12px; }
+.giro { width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: gira .8s linear infinite; }
+@keyframes gira { to { transform: rotate(360deg); } }
+
+.grade { display: grid; grid-template-columns: 300px 1fr; gap: 24px; align-items: start; }
+.dir { display: grid; gap: 16px; min-width: 0; }
+.cartao { background: var(--ng-branco); border: 1px solid var(--ng-borda); border-radius: var(--ng-raio-card); padding: 24px; }
+.cartao h2 { margin: 0 0 16px; font-size: 16px; font-weight: 700; color: var(--ng-verde-profundo); }
+.apoio { margin: -8px 0 16px; font-size: 12px; color: var(--ng-texto-3); }
+
+/* Identidade */
+.identidade { display: flex; flex-direction: column; align-items: center; padding: 32px 24px; text-align: center; }
+.avatar { display: inline-flex; align-items: center; justify-content: center; width: 72px; height: 72px; border-radius: 50%; background: var(--ng-verde-menta); font-size: 24px; font-weight: 700; color: var(--ng-verde-profundo); }
+.nome { margin: 12px 0 0; font-size: 16px; font-weight: 700; color: var(--ng-texto); overflow-wrap: anywhere; }
+.selo-perfil { display: inline-flex; align-items: center; gap: 4px; height: 22px; margin-top: 8px; padding: 0 10px; border-radius: var(--ng-raio-pill); background: var(--ng-areia); font-size: 11px; font-weight: 500; color: var(--ng-texto-3); }
+.selo-perfil .ms { font-size: 14px; }
+.email { margin: 8px 0 0; font-size: 12px; color: var(--ng-texto-3); overflow-wrap: anywhere; }
+.sair { display: inline-flex; align-items: center; gap: 4px; margin-top: 16px; padding: 4px; border: 0; background: transparent; font: 500 13px var(--ng-fonte); color: var(--ng-danger); cursor: pointer; }
+.sair:focus-visible { outline: 2px solid var(--ng-link); outline-offset: 2px; }
+.sair .ms { font-size: 16px; }
+
+/* Campos */
+.campos { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 16px; }
+.campos.tres { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.cheio { grid-column: 1 / -1; }
+.campo { min-width: 0; }
+label { display: block; margin-bottom: 6px; font-size: 11px; font-weight: 500; color: var(--ng-verde-escuro); }
+input { box-sizing: border-box; width: 100%; height: 40px; padding: 0 12px; border: 1px solid var(--ng-borda-campo); border-radius: var(--ng-raio-campo); background: var(--ng-branco); font: 400 14px var(--ng-fonte); color: var(--ng-texto); }
+input:focus-visible { outline: 2px solid var(--ng-link); outline-offset: 1px; border-color: var(--ng-verde-escuro); }
+input[aria-invalid='true'] { border-color: var(--ng-danger); }
+input.somente-leitura { background: #f2f2f2; color: var(--ng-cinza); border-color: var(--ng-borda); cursor: default; }
+input.somente-leitura:focus-visible { border-color: var(--ng-borda); outline-color: var(--ng-cinza); }
+small { display: block; min-height: 0; margin-top: 4px; font-size: 11px; line-height: 1.4; color: var(--ng-texto-3); }
+small:empty { display: none; }
+small.erro { color: var(--ng-danger); }
+.com-icone { position: relative; }
+.com-icone input { padding-right: 40px; }
+.olho { position: absolute; top: 0; right: 0; width: 40px; height: 40px; border: 0; background: transparent; color: var(--ng-texto-3); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.olho:focus-visible { outline: 2px solid var(--ng-link); outline-offset: -2px; border-radius: var(--ng-raio-campo); }
+.olho .ms { font-size: 20px; }
+
+.botoes { display: flex; justify-content: flex-end; gap: 8px; }
+
+@media (max-width: 767px) {
+  .grade { grid-template-columns: 1fr; gap: 16px; }
+  .identidade { display: grid; grid-template-columns: 56px 1fr; grid-template-areas: 'avatar nome' 'avatar selo' 'avatar email' 'sair sair'; justify-items: start; text-align: left; column-gap: 12px; padding: 16px; }
+  .avatar { grid-area: avatar; width: 56px; height: 56px; font-size: 20px; }
+  .nome { grid-area: nome; margin: 0; }
+  .selo-perfil { grid-area: selo; margin-top: 4px; }
+  .email { grid-area: email; margin: 4px 0 0; }
+  .sair { grid-area: sair; margin-top: 12px; }
+  .campos, .campos.tres { grid-template-columns: 1fr; }
+  .cartao { padding: 16px; }
+  .botoes { flex-direction: column-reverse; }
+  .botoes .btn { width: 100%; }
+}
