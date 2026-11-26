@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
+import { Router } from '@angular/router';
+import { rotaDaFonte } from '../../core/normas/rotas-normas';
 import { Mensagem } from '../../core/neo/neo.model';
 
 /** Uma mensagem do chat: do usuário, do Neo (com fonte ou aviso de falta de fonte), do sistema ou de erro. */
@@ -26,8 +28,7 @@ import { Mensagem } from '../../core/neo/neo.model';
             } @else {
               <p>{{ mensagem().texto }}</p>
               @for (fonte of mensagem().fontes ?? []; track fonte.documento + fonte.secao) {
-                <!-- TODO: abrir a norma na seção indicada (rota a definir) -->
-                <button type="button" class="cartao-fonte">
+                <button type="button" class="cartao-fonte" (click)="abrirFonte(fonte.documento, fonte.secao)">
                   <span class="cartao-fonte__rotulo">SEÇÃO CONSULTADA</span>
                   <span class="cartao-fonte__ref"><span class="ms" aria-hidden="true">menu_book</span>{{ fonte.documento }} · {{ fonte.secao }}</span>
                 </button>
@@ -128,6 +129,14 @@ import { Mensagem } from '../../core/neo/neo.model';
   `,
 })
 export class NeoMensagemComponent {
+  private readonly router = inject(Router);
+
+  /** Abre a norma na seção citada (ex.: DIS-NOR-030 · Tabela 10 leva à âncora da tabela). */
+  abrirFonte(documento: string, secao: string): void {
+    const destino = rotaDaFonte(documento, secao);
+    void this.router.navigate(destino.commands, destino.fragment ? { fragment: destino.fragment } : {});
+  }
+
   readonly mensagem = input.required<Mensagem>();
   readonly tentar = output<void>();
 }

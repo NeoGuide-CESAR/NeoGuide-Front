@@ -1,0 +1,151 @@
+<app-site-header [links]="links"><a class="usuario" routerLink="/perfil"><span class="ms" aria-hidden="true">account_circle</span>{{ auth.usuario()?.nome || 'Meu perfil' }}<span class="ms" aria-hidden="true">expand_more</span></a></app-site-header>
+
+<main class="conteudo">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a routerLink="/meus-projetos">Meus Projetos</a>
+    <span class="ms" aria-hidden="true">chevron_right</span>
+    <span aria-current="page">{{ nome() || 'Projeto' }}</span>
+  </nav>
+
+  <div class="titulo-linha desktop">
+    <h1>{{ nome() || 'Revisão' }}</h1>
+    <app-status-badge [tipo]="selo()" />
+  </div>
+
+  <div class="cabecalho-movel mobile">
+    <p class="movel-projeto">{{ nome() }}</p>
+    <div class="movel-linha"><h1>Revisão</h1><span class="movel-etapa">Etapa 6 de 6</span></div>
+    <div class="movel-barra" role="progressbar" aria-label="Progresso do cadastro" aria-valuemin="0" aria-valuemax="6" aria-valuenow="6"><span></span></div>
+  </div>
+
+  <nav class="stepper desktop" aria-label="Etapas do cálculo">
+    <ol>
+      @for (rotulo of etapasDoStepper; track rotulo; let i = $index; let ultimo = $last) {
+        <li [class.concluido]="!ultimo" [class.atual]="ultimo">
+          @if (!ultimo && passoAplicavel(i)) {
+            <button type="button" class="passo" (click)="editar(i)" [attr.aria-label]="'Ir para a etapa ' + rotulo">
+              <span class="circulo"><span class="ms" aria-hidden="true">check</span></span>
+              <span class="rotulo">{{ rotulo }}</span>
+            </button>
+          } @else {
+            <div class="passo" [attr.aria-current]="ultimo ? 'step' : null">
+              <span class="circulo">@if (ultimo) { 6 } @else { <span class="ms" aria-hidden="true">check</span> }</span>
+              <span class="rotulo">{{ rotulo }}</span>
+            </div>
+          }
+        </li>
+      }
+    </ol>
+  </nav>
+
+  <header class="cabecalho-etapa">
+    <p class="etapa-rotulo">Etapa 6 de 6</p>
+    <h2>Revise antes de calcular</h2>
+    <p class="etapa-texto">Tudo o que você preencheu, por etapa. Use EDITAR para corrigir; ao calcular, as etapas alteradas são recalculadas.</p>
+  </header>
+
+  @if (falhou()) {
+    <div class="falha" role="alert">
+      <p>Não foi possível carregar a revisão.</p>
+      <button type="button" class="btn btn--primario" (click)="carregar()">Tentar novamente</button>
+    </div>
+  } @else if (carregando()) {
+    <div class="grade" aria-busy="true" aria-label="Carregando a revisão">
+      <app-skeleton class="c1" [altura]="260" />
+      <app-skeleton class="c2" [altura]="200" />
+      <app-skeleton class="c3" [altura]="300" />
+      <app-skeleton class="c4" [altura]="140" />
+      <app-skeleton class="c5" [altura]="140" />
+    </div>
+  } @else {
+    @if (totalErros() > 0) {
+      <app-alert-banner variante="erro" class="banner">
+        {{ textoBannerErro() }}
+        @if (primeiroErro(); as e) { <a class="banner-link" [routerLink]="destino(e).commands" [queryParams]="destino(e).extras.queryParams">Ir para o erro em {{ rotuloDaEtapa(e.etapa) }}</a> }
+      </app-alert-banner>
+    } @else if (totalAlertas() > 0) {
+      <app-alert-banner variante="atencao" class="banner">
+        {{ textoBannerAtencao() }}
+        @if (primeiroAlerta(); as a) { <a class="banner-link" [routerLink]="destino(a).commands" [queryParams]="destino(a).extras.queryParams">Ver ponto de atenção em {{ rotuloDaEtapa(a.etapa) }}</a> }
+      </app-alert-banner>
+    }
+
+    <div class="grade">
+      <app-summary-card class="c1" [numero]="1" titulo="Projeto" [estado]="estadoCartao('projeto')" (editar)="editar(0)">
+        @for (m of mensagensDoCartao('projeto'); track $index) { <app-alert-banner [variante]="m.nivel === 'ERRO' ? 'erro' : 'atencao'" class="msg msg-item">{{ m.mensagem }} <a class="msg-link" [routerLink]="destino(m).commands" [queryParams]="destino(m).extras.queryParams">{{ m.rotuloAcao ?? (m.nivel === 'ERRO' ? 'Corrigir' : 'Revisar') }}</a>@if (destinoAlternativo(m); as alt) { <a class="msg-link" [routerLink]="alt.commands" [queryParams]="alt.extras.queryParams">{{ m.alternativa?.rotulo }}</a> }</app-alert-banner> }
+        <app-key-value-list class="detalhe" [itens]="linhasProjeto()" />
+        <p class="resumo-movel">{{ resumoMovel()?.projeto }}</p>
+      </app-summary-card>
+
+      <app-summary-card class="c2" [numero]="2" titulo="Residencial" [editavel]="aplicaResidencial()" [estado]="estadoCartao('residencial')" (editar)="editar(1)">
+        @if (!aplicaResidencial()) {
+          <p class="nao-aplica">{{ naoSeAplica }}</p>
+        } @else {
+          @for (m of mensagensDoCartao('residencial'); track $index) { <app-alert-banner [variante]="m.nivel === 'ERRO' ? 'erro' : 'atencao'" class="msg msg-item">{{ m.mensagem }} <a class="msg-link" [routerLink]="destino(m).commands" [queryParams]="destino(m).extras.queryParams">{{ m.rotuloAcao ?? (m.nivel === 'ERRO' ? 'Corrigir' : 'Revisar') }}</a>@if (destinoAlternativo(m); as alt) { <a class="msg-link" [routerLink]="alt.commands" [queryParams]="alt.extras.queryParams">{{ m.alternativa?.rotulo }}</a> }</app-alert-banner> }
+          <div class="detalhe">
+            <div class="tabela">
+              <table>
+                <caption class="sr-only">Grupos de unidades residenciais</caption>
+                <thead><tr><th scope="col">Grupo</th><th scope="col">Unidades</th><th scope="col">Área de cada</th></tr></thead>
+                <tbody>
+                  @for (g of grupos(); track g.grupo) { <tr><td>Grupo {{ g.grupo }}</td><td>{{ g.unidades }}</td><td>{{ g.area }}</td></tr> }
+                  @empty { <tr><td colspan="3" class="vazio">Nenhum grupo informado</td></tr> }
+                </tbody>
+              </table>
+            </div>
+            <p class="smart">Smart studio: <strong>{{ smartStudio() }}</strong></p>
+          </div>
+          <p class="resumo-movel">{{ resumoMovel()?.residencial }}</p>
+        }
+      </app-summary-card>
+
+      <app-summary-card class="c3" [numero]="3" titulo="Área comum" [estado]="estadoCartao('area-comum')" (editar)="editar(2, abaDaAreaComum())">
+        @for (m of mensagensDoCartao('area-comum'); track $index) { <app-alert-banner [variante]="m.nivel === 'ERRO' ? 'erro' : 'atencao'" class="msg msg-item">{{ m.mensagem }} <a class="msg-link" [routerLink]="destino(m).commands" [queryParams]="destino(m).extras.queryParams">{{ m.rotuloAcao ?? (m.nivel === 'ERRO' ? 'Corrigir' : 'Revisar') }}</a>@if (destinoAlternativo(m); as alt) { <a class="msg-link" [routerLink]="alt.commands" [queryParams]="alt.extras.queryParams">{{ m.alternativa?.rotulo }}</a> }</app-alert-banner> }
+        <div class="detalhe">
+          @for (secao of secoesAreaComum(); track secao.titulo) {
+            <section class="secao">
+              <h3>{{ secao.titulo }}</h3>
+              @if (secao.itens.length) {
+                <p class="itens">
+                  @for (item of secao.itens; track $index) { <span>{{ item.rotulo }}: <strong>{{ item.valor }}</strong></span>@if (!$last) { · } }
+                </p>
+                @if (secao.semPotencia) { <p class="aviso-potencia"><span class="ms" aria-hidden="true">warning</span>Potência não informada</p> }
+              } @else {
+                <p class="vazio">Nenhum valor informado</p>
+              }
+            </section>
+          }
+        </div>
+        <p class="resumo-movel">{{ resumoMovel()?.areaComum }}</p>
+      </app-summary-card>
+
+      <app-summary-card class="c4" [numero]="4" titulo="Comercial" [editavel]="aplicaComercial()" [estado]="estadoCartao('comercial')" (editar)="editar(3)">
+        @if (!aplicaComercial()) {
+          <p class="nao-aplica">{{ naoSeAplica }}</p>
+        } @else {
+          @for (m of mensagensDoCartao('comercial'); track $index) { <app-alert-banner [variante]="m.nivel === 'ERRO' ? 'erro' : 'atencao'" class="msg msg-item">{{ m.mensagem }} <a class="msg-link" [routerLink]="destino(m).commands" [queryParams]="destino(m).extras.queryParams">{{ m.rotuloAcao ?? (m.nivel === 'ERRO' ? 'Corrigir' : 'Revisar') }}</a>@if (destinoAlternativo(m); as alt) { <a class="msg-link" [routerLink]="alt.commands" [queryParams]="alt.extras.queryParams">{{ m.alternativa?.rotulo }}</a> }</app-alert-banner> }
+          @if (linhasComercial().length) {
+            <app-key-value-list class="detalhe" [itens]="linhasComercial()" />
+            <p class="resumo-movel">{{ resumoMovel()?.comercial }}</p>
+          } @else {
+            <p class="nao-aplica">Nenhum espaço comercial informado</p>
+          }
+        }
+      </app-summary-card>
+
+      <app-summary-card class="c5" [numero]="5" titulo="Veículo elétrico e bomba de incêndio" [editavel]="aplicaEspeciais()" [estado]="estadoCartao('cargas-especiais')" (editar)="editar(4)">
+        @for (m of mensagensDoCartao('cargas-especiais'); track $index) { <app-alert-banner [variante]="m.nivel === 'ERRO' ? 'erro' : 'atencao'" class="msg msg-item">{{ m.mensagem }} <a class="msg-link" [routerLink]="destino(m).commands" [queryParams]="destino(m).extras.queryParams">{{ m.rotuloAcao ?? (m.nivel === 'ERRO' ? 'Corrigir' : 'Revisar') }}</a>@if (destinoAlternativo(m); as alt) { <a class="msg-link" [routerLink]="alt.commands" [queryParams]="alt.extras.queryParams">{{ m.alternativa?.rotulo }}</a> }</app-alert-banner> }
+        <app-key-value-list class="detalhe" [itens]="linhasEspeciais()" />
+        <p class="resumo-movel">{{ resumoMovel()?.especiais }}</p>
+      </app-summary-card>
+    </div>
+
+    <footer class="barra">
+      <button type="button" class="btn btn--contorno" (click)="voltar()"><span class="ms" aria-hidden="true">arrow_back</span>Voltar</button>
+      <p class="status" [class]="'status status--' + rodape().tom" role="status">{{ rodape().texto }}</p>
+      <button type="button" class="btn btn--primario" [disabled]="!podeCalcular()" (click)="calcular()"><span class="ms" aria-hidden="true">bolt</span>Calcular demanda</button>
+    </footer>
+  }
+</main>
+
+<app-site-footer />

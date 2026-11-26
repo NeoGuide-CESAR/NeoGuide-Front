@@ -4,7 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { Router } from '@angular/router';
 
 import { authInterceptor } from './auth.interceptor';
-import { AuthService } from './auth.service';
+import { AuthService, ErroAutenticacao } from './auth.service';
 
 /** Resposta de exemplo de POST /api/v1/auth/login (formato do back). */
 const RESPOSTA_LOGIN = {
@@ -112,5 +112,59 @@ describe('Integração auth: AuthService + authInterceptor', () => {
     http.expectOne('/api/v1/auth/login').flush({ message: 'E-mail ou senha incorretos.' }, { status: 401, statusText: 'Unauthorized' });
 
     expect(routerSpy.navigate).not.toHaveBeenCalled();
+  });
+
+  it('erro de login sem conexão vira ErroAutenticacao com status 0 (não é tratado como senha errada)', () => {
+    let erro: ErroAutenticacao | undefined;
+    auth.entrar({ documento: 'x@y.com', senha: 'abc' }).subscribe({ error: (e) => (erro = e) });
+    http.expectOne('/api/v1/auth/login').error(new ProgressEvent('error'), { status: 0, statusText: 'Unknown Error' });
+
+    expect(erro instanceof ErroAutenticacao).toBeTrue();
+    expect(erro?.status).toBe(0);
+  });
+
+  it('cadastrar envia o corpo do back, cria a conta e entra com as mesmas credenciais', () => {
+    let usuario: { nome: string } | undefined;
+    auth
+      .cadastrar({ nome: ' Ana Lima ', email: 'ana@neoguide.com', cpfCnpj: '', senha: 'senha1234', confirmacaoSenha: 'senha1234' })
+      .subscribe((u) => (usuario = u));
+
+    const registro = http.expectOne('/api/v1/auth/register');
+    expect(registro.request.body).toEqual({
+      name: 'Ana Lima',
+      email: 'ana@neoguide.com',
+      cpfCnpj: null,
+      password: 'senha1234',
+      confirmPassword: 'senha1234',
+    });
+    registro.flush({ id: 9, name: 'Ana Lima', email: 'ana@neoguide.com' }, { status: 201, statusText: 'Created' });
+
+    const login = http.expectOne('/api/v1/auth/login');
+    expect(login.request.body).toEqual({ login: 'ana@neoguide.com', password: 'senha1234' });
+    login.flush({ ...RESPOSTA_LOGIN, usuario: { id: 9, name: 'Ana Lima', email: 'ana@neoguide.com', role: 'ROLE_PROJETISTA' } });
+
+    expect(usuario?.nome).toBe('Ana Lima');
+    expect(auth.autenticado()).toBeTrue();
+  });
+
+  it('cadastro recusado pelo back traz os erros de cada campo', () => {
+    let erro: ErroAutenticacao | undefined;
+    auth
+      .cadastrar({ nome: 'A', email: 'x', senha: 'abc', confirmacaoSenha: 'abd' })
+      .subscribe({ error: (e) => (erro = e) });
+
+    http.expectOne('/api/v1/auth/register').flush(
+      {
+        status: 400,
+        message: 'Dados inválidos',
+        errors: { name: 'Deve ter no mínimo 3 caracteres', confirmPassword: 'As senhas não conferem' },
+      },
+      { status: 400, statusText: 'Bad Request' },
+    );
+
+    expect(erro?.status).toBe(400);
+    expect(erro?.campos['name']).toBe('Deve ter no mínimo 3 caracteres');
+    expect(erro?.campos['confirmPassword']).toBe('As senhas não conferem');
+    expect(auth.autenticado()).toBeFalse();
   });
 });

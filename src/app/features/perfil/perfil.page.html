@@ -1,0 +1,112 @@
+<app-site-header [links]="links"><a class="usuario" routerLink="/perfil"><span class="ms" aria-hidden="true">account_circle</span>{{ nomeExibido() || 'Meu perfil' }}<span class="ms" aria-hidden="true">expand_more</span></a></app-site-header>
+
+<main class="conteudo">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a routerLink="/inicio">Início</a>
+    <span class="ms" aria-hidden="true">chevron_right</span>
+    <span aria-current="page">Meu perfil</span>
+  </nav>
+  <div class="titulo-linha"><h1>Meu perfil</h1></div>
+
+  @switch (estado()) {
+    @case ('erro') {
+      <div class="falha" role="alert">
+        <p>Não foi possível carregar seus dados.</p>
+        <button type="button" class="btn btn--primario" (click)="carregar()">Tentar novamente</button>
+      </div>
+    }
+    @case ('carregando') {
+      <div class="grade" aria-busy="true" aria-label="Carregando seus dados">
+        <div class="esq"><app-skeleton [altura]="240" /></div>
+        <div class="dir"><app-skeleton [altura]="260" /><app-skeleton [altura]="170" /></div>
+      </div>
+    }
+    @case ('ok') {
+      <form class="grade" [formGroup]="form" (ngSubmit)="salvar()" novalidate>
+        <aside class="esq cartao identidade" aria-label="Identidade">
+          <span class="avatar" aria-hidden="true">{{ iniciais() }}</span>
+          <p class="nome">{{ nomeExibido() }}</p>
+          <span class="selo-perfil"><span class="ms" aria-hidden="true">engineering</span>{{ rotuloPerfil() }}</span>
+          <p class="email">{{ emailExibido() }}</p>
+          <button type="button" class="sair" aria-label="Sair da conta" (click)="sair()"><span class="ms" aria-hidden="true">logout</span>Sair da conta</button>
+        </aside>
+
+        <div class="dir">
+          <section class="cartao" aria-labelledby="t-dados">
+            <h2 id="t-dados">Meus dados</h2>
+            <div class="campos">
+              <div class="campo cheio">
+                <label for="perfil-nome">Nome completo *</label>
+                <input id="perfil-nome" type="text" formControlName="nome" autocomplete="name" maxlength="100" [attr.aria-invalid]="!!mensagem('nome')" aria-describedby="erro-nome" (blur)="tocar('nome')" (input)="aoEditar('nome')">
+                <small class="erro" id="erro-nome" aria-live="polite">{{ mensagem('nome') }}</small>
+              </div>
+              <div class="campo">
+                <label for="perfil-cpf">CPF/CNPJ</label>
+                <input id="perfil-cpf" type="text" formControlName="cpfCnpj" class="somente-leitura" readonly aria-readonly="true" aria-describedby="ajuda-cpf">
+                <small id="ajuda-cpf">Para alterar, fale com o suporte.</small>
+              </div>
+              <div class="campo">
+                <label for="perfil-telefone">Telefone</label>
+                <input id="perfil-telefone" type="tel" formControlName="telefone" autocomplete="tel" inputmode="tel" [attr.aria-invalid]="!!mensagem('telefone')" aria-describedby="erro-telefone" (input)="aoDigitarTelefone($event)" (blur)="tocar('telefone')">
+                <small class="erro" id="erro-telefone" aria-live="polite">{{ mensagem('telefone') }}</small>
+              </div>
+              <div class="campo">
+                <label for="perfil-email">E-mail *</label>
+                <input id="perfil-email" type="email" formControlName="email" autocomplete="email" maxlength="150" [attr.aria-invalid]="!!mensagem('email')" aria-describedby="erro-email" (blur)="tocar('email')" (input)="aoEditar('email')">
+                <small class="erro" id="erro-email" aria-live="polite">{{ mensagem('email') }}</small>
+              </div>
+              <div class="campo">
+                <label for="perfil-registro">Registro profissional (CREA/CFT) {{ perfil()?.perfil === 'ANALISTA' ? '' : '*' }}</label>
+                <input id="perfil-registro" type="text" formControlName="registro" maxlength="30" placeholder="CREA-PE 123456" [attr.aria-invalid]="!!mensagem('registro')" aria-describedby="erro-registro" (blur)="tocar('registro')" (input)="aoEditar('registro')">
+                <small class="erro" id="erro-registro" aria-live="polite">{{ mensagem('registro') }}</small>
+              </div>
+            </div>
+          </section>
+
+          <section class="cartao" aria-labelledby="t-senha">
+            <h2 id="t-senha">Alterar senha</h2>
+            <p class="apoio">Preencha só se quiser trocar a senha.</p>
+            <div class="campos tres">
+              <div class="campo">
+                <label for="perfil-senha-atual">Senha atual{{ exigeSenhaAtual() ? ' *' : '' }}</label>
+                <div class="com-icone">
+                  <input id="perfil-senha-atual" [type]="senhaVisivel().atual ? 'text' : 'password'" formControlName="senhaAtual" autocomplete="current-password" [attr.aria-invalid]="!!mensagem('senhaAtual')" aria-describedby="dica-senha-atual erro-senha-atual" (blur)="tocar('senhaAtual')" (input)="aoEditar('senhaAtual')">
+                  <button type="button" class="olho" [attr.aria-label]="senhaVisivel().atual ? 'Ocultar senha' : 'Mostrar senha'" (click)="alternarSenha('atual')"><span class="ms" aria-hidden="true">{{ senhaVisivel().atual ? 'visibility_off' : 'visibility' }}</span></button>
+                </div>
+                @if (emailMudou() && !mensagem('senhaAtual')) { <small id="dica-senha-atual">Para trocar o e-mail, confirme sua senha atual.</small> }
+                <small class="erro" id="erro-senha-atual" aria-live="polite">{{ mensagem('senhaAtual') }}</small>
+              </div>
+              <div class="campo">
+                <label for="perfil-nova-senha">Nova senha</label>
+                <div class="com-icone">
+                  <input id="perfil-nova-senha" [type]="senhaVisivel().nova ? 'text' : 'password'" formControlName="novaSenha" autocomplete="new-password" [attr.aria-invalid]="!!mensagem('novaSenha')" aria-describedby="ajuda-nova erro-nova" (blur)="tocar('novaSenha')" (input)="aoEditar('novaSenha')">
+                  <button type="button" class="olho" [attr.aria-label]="senhaVisivel().nova ? 'Ocultar senha' : 'Mostrar senha'" (click)="alternarSenha('nova')"><span class="ms" aria-hidden="true">{{ senhaVisivel().nova ? 'visibility_off' : 'visibility' }}</span></button>
+                </div>
+                <small id="ajuda-nova">Mínimo de 8 caracteres, com letras e números.</small>
+                <small class="erro" id="erro-nova" aria-live="polite">{{ mensagem('novaSenha') }}</small>
+              </div>
+              <div class="campo">
+                <label for="perfil-confirmar">Confirmar nova senha</label>
+                <div class="com-icone">
+                  <input id="perfil-confirmar" [type]="senhaVisivel().confirmar ? 'text' : 'password'" formControlName="confirmar" autocomplete="new-password" [attr.aria-invalid]="!!mensagem('confirmar')" aria-describedby="erro-confirmar" (blur)="tocar('confirmar')" (input)="aoEditar('confirmar')">
+                  <button type="button" class="olho" [attr.aria-label]="senhaVisivel().confirmar ? 'Ocultar senha' : 'Mostrar senha'" (click)="alternarSenha('confirmar')"><span class="ms" aria-hidden="true">{{ senhaVisivel().confirmar ? 'visibility_off' : 'visibility' }}</span></button>
+                </div>
+                <small class="erro" id="erro-confirmar" aria-live="polite">{{ mensagem('confirmar') }}</small>
+              </div>
+            </div>
+          </section>
+
+          <div class="botoes">
+            <button type="button" class="btn btn--sm btn--contorno" [disabled]="salvando()" (click)="cancelar()">Cancelar</button>
+            <button type="submit" class="btn btn--sm btn--primario" [disabled]="!podeSalvar()">
+              @if (salvando()) { <span class="giro" aria-hidden="true"></span>Salvando… } @else { Salvar alterações }
+            </button>
+          </div>
+        </div>
+      </form>
+    }
+  }
+</main>
+
+<app-snackbar />
+<app-site-footer />

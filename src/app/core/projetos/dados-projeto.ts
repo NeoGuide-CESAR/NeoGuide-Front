@@ -28,5 +28,6 @@ export const dadosExemplo = (): DadosProjeto => ({ nome: 'Residencial Jardim', t
 
 export function etapasAplicaveis(dados: DadosProjeto, valido: boolean): boolean[] {
   if (!valido || !dados.tipoEdificacao) return [true, false, false, false, false, false];
-  return [true, dados.tipoEdificacao !== 'Comercial', true, dados.tipoEdificacao !== 'Residencial multifamiliar', dados.temVe || dados.temBomba, true];
+  // Comercial é sempre disponível e opcional; só residencial (tipo Comercial) e VE/bomba dependem do projeto.
+  return [true, dados.tipoEdificacao !== 'Comercial', true, true, dados.temVe || dados.temBomba, true];
 }

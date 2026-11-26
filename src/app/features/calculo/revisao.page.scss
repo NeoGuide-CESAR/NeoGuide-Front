@@ -1,0 +1,78 @@
+/* Stepper */
+.stepper { padding: 16px 32px; margin-bottom: 24px; background: var(--ng-branco); border: 1px solid var(--ng-borda); border-radius: var(--ng-raio-card); }
+.stepper ol { display: flex; margin: 0; padding: 0; }
+.stepper li { flex: 1; position: relative; min-width: 0; text-align: center; }
+.stepper li:not(:last-child)::after { content: ''; position: absolute; top: 12px; left: calc(50% + 20px); right: calc(-50% + 20px); height: 2px; background: var(--ng-verde-escuro); }
+.passo { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; padding: 0; border: 0; background: transparent; font: inherit; color: inherit; }
+button.passo { cursor: pointer; }
+button.passo:focus-visible { outline: 2px solid var(--ng-link); outline-offset: 4px; border-radius: var(--ng-raio-campo); }
+.circulo { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: var(--ng-verde-escuro); color: var(--ng-branco); font-size: 12px; font-weight: 700; }
+.circulo .ms { font-size: 16px; }
+.atual .circulo { box-shadow: 0 0 0 3px var(--ng-verde-menta); }
+.rotulo { font-size: 11px; color: var(--ng-texto-3); }
+.atual .rotulo { font-weight: 700; color: var(--ng-texto); }
+
+/* Cabeçalho da etapa */
+.cabecalho-etapa { margin-bottom: 24px; }
+.etapa-rotulo { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ng-texto-3); }
+.cabecalho-etapa h2 { margin: 4px 0 8px; font-size: 20px; font-weight: 700; color: var(--ng-verde-profundo); }
+.etapa-texto { font-size: 13px; color: var(--ng-texto); }
+.banner { margin-bottom: 24px; }
+.banner-link, .msg-link { margin-left: 8px; font-weight: 700; color: var(--ng-verde-escuro); text-decoration: underline; }
+.banner-link:focus-visible, .msg-link:focus-visible { outline: 2px solid var(--ng-link); outline-offset: 2px; }
+
+/* Grade: esquerda 1, 2, 4 e direita 3, 5; a ordem do DOM continua 1 a 5 */
+.grade { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto auto; gap: 16px 24px; align-items: start; }
+.c1 { grid-column: 1; grid-row: 1; }
+.c2 { grid-column: 1; grid-row: 2; }
+.c3 { grid-column: 2; grid-row: 1 / span 2; }
+.c4 { grid-column: 1; grid-row: 3; }
+.c5 { grid-column: 2; grid-row: 3; }
+
+.msg { margin-bottom: 16px; }
+.nao-aplica { margin: 0; font-size: 13px; color: var(--ng-texto-3); }
+.vazio { margin: 0; font-size: 13px; font-style: italic; color: var(--ng-cinza); }
+.resumo-movel { display: none; margin: 0; font-size: 13px; color: var(--ng-texto); }
+
+.tabela { border: 1px solid var(--ng-borda); border-radius: var(--ng-raio-alerta); overflow: hidden; }
+table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+th { height: 32px; padding: 0 12px; background: var(--ng-creme); font-size: 11px; font-weight: 500; color: var(--ng-texto-3); }
+td { height: 36px; padding: 0 12px; color: var(--ng-texto); border-top: 1px solid var(--ng-borda); }
+.smart { margin: 12px 0 0; font-size: 13px; color: var(--ng-texto-3); }
+.smart strong { color: var(--ng-texto); }
+
+.secao + .secao { margin-top: 12px; }
+.secao h3 { margin: 0 0 4px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ng-verde); }
+.itens { margin: 0; font-size: 13px; line-height: 1.6; color: var(--ng-texto); }
+.itens strong { font-weight: 700; }
+.aviso-potencia { display: flex; align-items: center; gap: 4px; margin: 4px 0 0; font-size: 12px; color: var(--ng-atencao-texto); }
+.aviso-potencia .ms { font-size: 16px; color: var(--ng-laranja); }
+
+/* Barra inferior */
+.barra { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 32px; }
+.status { margin: 0; font-size: 13px; font-weight: 500; text-align: center; color: var(--ng-verde-escuro); }
+.status--erro { color: var(--ng-danger); }
+.status--atencao { font-weight: 400; color: var(--ng-texto-3); }
+
+/* Cabeçalho compacto (mobile) */
+.mobile { display: none; }
+.cabecalho-movel { margin-bottom: 16px; }
+.movel-projeto { margin: 0 0 4px; font-size: 12px; color: var(--ng-texto-3); }
+.movel-linha { display: flex; align-items: baseline; justify-content: space-between; }
+.movel-linha h1 { font-size: 20px; }
+.movel-etapa { font-size: 12px; color: var(--ng-verde-escuro); }
+.movel-barra { height: 4px; margin-top: 8px; border-radius: var(--ng-raio-pill); background: var(--ng-verde-menta); }
+.movel-barra span { display: block; width: 100%; height: 100%; border-radius: var(--ng-raio-pill); background: var(--ng-verde-escuro); }
+
+@media (max-width: 767px) {
+  .desktop { display: none; }
+  .mobile { display: block; }
+  .grade { grid-template-columns: 1fr; grid-template-rows: none; gap: 16px; }
+  .c1, .c2, .c3, .c4, .c5 { grid-column: 1; grid-row: auto; }
+  .detalhe { display: none; }
+  .resumo-movel { display: block; }
+  .cabecalho-etapa h2, .etapa-rotulo { display: none; }
+  .barra { position: fixed; inset: auto 0 0 0; z-index: 5; flex-direction: column-reverse; gap: 8px; margin: 0; padding: 12px 16px; background: var(--ng-branco); border-top: 1px solid var(--ng-borda); }
+  .barra .btn { width: 100%; }
+  .barra .btn--contorno { display: none; }
+}

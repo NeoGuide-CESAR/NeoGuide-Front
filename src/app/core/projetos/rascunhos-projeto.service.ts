@@ -1,31 +1,52 @@
-import { Injectable, inject } from '@angular/core';
-import { DadosProjeto, dadosExemplo, normalizarDados } from './dados-projeto';
-import { ProjetosService } from './projetos.service';
+import { Injectable } from '@angular/core';
+import { DadosProjeto, normalizarDados } from './dados-projeto';
 import { ComplementosCalculo, RascunhoCalculo, complementosVazios, lerComplementos } from './dados-calculo';
 
-/** Persistência local para testar a prancheta; não representa criação no backend. */
+const CHAVE_RASCUNHO = (id: string) => `neoguide.rascunho.${id}`;
+const CHAVE_COMPLEMENTOS = (id: string) => `neoguide.complementos.${id}`;
+
+/**
+ * Armazenamento local do wizard.
+ * - Rascunhos sem id no back (`rascunho-*`): dados e etapas ficam neste navegador.
+ * - Projetos do back: o passo 1 vai para a API; as etapas (complementos) ficam neste navegador,
+ *   por id do projeto, até cada etapa ser integrada com a API.
+ */
 @Injectable({ providedIn: 'root' })
 export class RascunhosProjetoService {
-  private readonly projetos = inject(ProjetosService);
   carregar(id: string): DadosProjeto | null {
-    const salvo = localStorage.getItem(`neoguide.rascunho.${id}`);
-    if (salvo) { const valor = JSON.parse(salvo); return normalizarDados(valor.dados ?? valor); }
-    const mock = this.projetos.projetos().find(p => p.id === id);
-    return mock ? { ...dadosExemplo(), nome: mock.nome, tipoEdificacao: id === 'p5' ? 'Comercial' : 'Residencial multifamiliar' } : null;
+    const salvo = lerJson(CHAVE_RASCUNHO(id));
+    return salvo ? normalizarDados(salvo.dados ?? salvo) : null;
   }
+
   salvar(dados: DadosProjeto, id?: string): string {
     const complementos = id ? this.carregarCompleto(id)?.complementos ?? complementosVazios() : complementosVazios();
     return this.salvarCompleto(dados, complementos, id);
   }
+
   carregarCompleto(id: string): RascunhoCalculo | null {
     const dados = this.carregar(id);
     if (!dados) return null;
-    const salvo = localStorage.getItem(`neoguide.rascunho.${id}`);
-    return { dados, complementos: lerComplementos(salvo ? JSON.parse(salvo).complementos : null) };
+    const salvo = lerJson(CHAVE_RASCUNHO(id));
+    return { dados, complementos: lerComplementos(salvo?.complementos ?? null) };
   }
+
   salvarCompleto(dados: DadosProjeto, complementos: ComplementosCalculo, id?: string): string {
     const identificador = id ?? `rascunho-${crypto.randomUUID()}`;
-    localStorage.setItem(`neoguide.rascunho.${identificador}`, JSON.stringify({ versao: 2, dados: normalizarDados(dados), complementos: lerComplementos(complementos) }));
+    localStorage.setItem(CHAVE_RASCUNHO(identificador), JSON.stringify({ versao: 2, dados: normalizarDados(dados), complementos: lerComplementos(complementos) }));
     return identificador;
   }
+
+  /** Etapas de um projeto do back, guardadas neste navegador. */
+  carregarComplementos(projetoId: string): ComplementosCalculo {
+    return lerComplementos(lerJson(CHAVE_COMPLEMENTOS(projetoId)));
+  }
+
+  salvarComplementos(projetoId: string, complementos: ComplementosCalculo): void {
+    localStorage.setItem(CHAVE_COMPLEMENTOS(projetoId), JSON.stringify(lerComplementos(complementos)));
+  }
+}
+
+function lerJson(chave: string): any | null {
+  const bruto = localStorage.getItem(chave);
+  return bruto ? JSON.parse(bruto) : null;
 }

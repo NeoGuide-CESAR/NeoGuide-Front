@@ -9,10 +9,10 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
-import { AuthService } from '../../core/auth/auth.service';
+import { AuthService, ErroAutenticacao } from '../../core/auth/auth.service';
 import { ROTA_INICIAL, sanitizarRetorno } from '../../core/auth/return-url';
 import { documentoOuEmailValidator } from '../../shared/validators/documento.validator';
 
@@ -27,7 +27,7 @@ const ERRO_CREDENCIAIS = 'Confira os dados ou redefina sua senha.';
 @Component({
   selector: 'app-login-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './login-dialog.component.html',
   styleUrl: './login-dialog.component.scss',
@@ -115,12 +115,19 @@ export class LoginDialogComponent {
           this.fechar();
           this.router.navigateByUrl(sanitizarRetorno(this.returnUrl()) ?? ROTA_INICIAL);
         },
-        error: () => this.falharLogin(),
+        error: (erro: unknown) => this.falharLogin(erro),
       });
   }
 
-  /** Mostra o alerta, limpa só a senha, mantém o e-mail e devolve o foco para a senha. */
-  private falharLogin(): void {
+  /**
+   * Credenciais erradas (401): alerta genérico, limpa só a senha e devolve o foco para ela.
+   * Outras falhas (servidor fora do ar, erro inesperado): mostra a mensagem real, sem culpar a senha.
+   */
+  private falharLogin(erro: unknown): void {
+    if (erro instanceof ErroAutenticacao && erro.status !== 401) {
+      this.erroServidor.set(erro.message);
+      return;
+    }
     this.erroCredenciais.set(true);
     this.form.controls.senha.reset('');
     queueMicrotask(() => this.campoSenha().nativeElement.focus());

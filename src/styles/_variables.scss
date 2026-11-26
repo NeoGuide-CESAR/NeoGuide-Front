@@ -207,6 +207,16 @@ $light-mode-input-placeholder-color: #9ca3af;
   --ng-sombra-modal: 0 11px 15px -7px rgba(0, 16, 11, 0.2), 0 24px 38px 3px rgba(0, 16, 11, 0.14), 0 9px 46px 8px rgba(0, 16, 11, 0.12);
   --ng-fundo-modal: rgba(0, 0, 0, 0.32); /* fundo atrás do painel só no mobile */
 
+  /* Telas de revisão, cálculo e resultado */
+  --ng-verde-menta: #e8f5ec;            /* fundo de ícones e selos */
+  --ng-verde-sobre-escuro: #7fd9a5;     /* rótulos sobre a faixa #00402a (contraste ≥ 4,5:1) */
+  --ng-areia: #efeae5;                  /* selo de rascunho */
+  --ng-danger-fundo: #fdecec;
+  --ng-atencao-texto: #8a4b00;
+  --ng-info-claro-bg: #e8f1fb;
+  --ng-raio-destaque: 24px;
+  --ng-raio-alerta: 4px;
+
   /* Raios e layout */
   --ng-raio-card: 10px;
   --ng-raio-campo: 5px;

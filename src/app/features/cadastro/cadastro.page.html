@@ -1,0 +1,71 @@
+<main class="cadastro">
+  <section class="cartao" aria-labelledby="titulo-cadastro">
+    <h1 id="titulo-cadastro" class="titulo">Criar conta de projetista</h1>
+    <p class="apoio">Preencha os dados para criar sua conta e começar a usar o NeoGuide.</p>
+
+    @if (erroGeral(); as msg) {
+      <div class="alerta" role="alert">
+        <span class="ms" aria-hidden="true">error</span>
+        <span>{{ msg }}</span>
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="enviar()" novalidate class="form">
+      <div class="campo" [class.campo--erro]="mensagem('nome')">
+        <label for="nome" class="campo__rotulo">Nome completo</label>
+        <input id="nome" type="text" formControlName="nome" autocomplete="name"
+               [attr.aria-invalid]="!!mensagem('nome')" [attr.aria-describedby]="mensagem('nome') ? 'erro-nome' : null" />
+        @if (mensagem('nome'); as msg) {
+          <span id="erro-nome" class="campo__erro">{{ msg }}</span>
+        }
+      </div>
+
+      <div class="campo" [class.campo--erro]="mensagem('email')">
+        <label for="email" class="campo__rotulo">E-mail</label>
+        <input id="email" type="email" formControlName="email" autocomplete="email" inputmode="email"
+               [attr.aria-invalid]="!!mensagem('email')" [attr.aria-describedby]="mensagem('email') ? 'erro-email' : null" />
+        @if (mensagem('email'); as msg) {
+          <span id="erro-email" class="campo__erro">{{ msg }}</span>
+        }
+      </div>
+
+      <div class="campo" [class.campo--erro]="mensagem('cpfCnpj')">
+        <label for="cpfCnpj" class="campo__rotulo">CPF ou CNPJ <span class="opcional">(opcional)</span></label>
+        <input id="cpfCnpj" type="text" formControlName="cpfCnpj" inputmode="numeric" autocomplete="off"
+               [attr.aria-invalid]="!!mensagem('cpfCnpj')" [attr.aria-describedby]="mensagem('cpfCnpj') ? 'erro-cpfCnpj' : null" />
+        @if (mensagem('cpfCnpj'); as msg) {
+          <span id="erro-cpfCnpj" class="campo__erro">{{ msg }}</span>
+        }
+      </div>
+
+      <div class="campo" [class.campo--erro]="mensagem('senha')">
+        <label for="senha" class="campo__rotulo">Senha</label>
+        <input id="senha" type="password" formControlName="senha" autocomplete="new-password"
+               [attr.aria-invalid]="!!mensagem('senha')" [attr.aria-describedby]="mensagem('senha') ? 'erro-senha' : 'dica-senha'" />
+        <span id="dica-senha" class="dica">Mínimo de 8 caracteres, com letras e números.</span>
+        @if (mensagem('senha'); as msg) {
+          <span id="erro-senha" class="campo__erro">{{ msg }}</span>
+        }
+      </div>
+
+      <div class="campo" [class.campo--erro]="mensagem('confirmacaoSenha')">
+        <label for="confirmacaoSenha" class="campo__rotulo">Confirmar senha</label>
+        <input id="confirmacaoSenha" type="password" formControlName="confirmacaoSenha" autocomplete="new-password"
+               [attr.aria-invalid]="!!mensagem('confirmacaoSenha')" [attr.aria-describedby]="mensagem('confirmacaoSenha') ? 'erro-confirmacao' : null" />
+        @if (mensagem('confirmacaoSenha'); as msg) {
+          <span id="erro-confirmacao" class="campo__erro">{{ msg }}</span>
+        }
+      </div>
+
+      <button type="submit" class="botao" [disabled]="enviando()">
+        @if (enviando()) {
+          Criando conta…
+        } @else {
+          Criar conta
+        }
+      </button>
+    </form>
+
+    <p class="rodape">Já tem conta? <a routerLink="/login">Entrar</a></p>
+  </section>
+</main>

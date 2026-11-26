@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
 import { API_BASE } from '../api/api.config';
 
@@ -17,6 +17,29 @@ export interface Credenciais {
   senha: string;
 }
 
+export interface DadosCadastro {
+  nome: string;
+  email: string;
+  cpfCnpj?: string;
+  senha: string;
+  confirmacaoSenha: string;
+}
+
+/**
+ * Erro de autenticação ou cadastro.
+ * `status`: 0 sem conexão, 400 validação (`campos` traz o erro de cada campo do back), 401 credenciais, 409 conflito.
+ */
+export class ErroAutenticacao extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly campos: Record<string, string> = {},
+  ) {
+    super(message);
+    this.name = 'ErroAutenticacao';
+  }
+}
+
 /** Resposta de POST /api/v1/auth/login (LoginResponse do back). */
 interface RespostaLogin {
   token: string;
@@ -29,11 +52,11 @@ const CHAVE_SESSAO = 'neoguide.sessao';
 const CHAVE_TOKEN = 'neoguide.token';
 
 const MENSAGEM_CREDENCIAIS = 'E-mail ou senha incorretos.';
-const MENSAGEM_SEM_CONEXAO = 'Não foi possível conectar ao servidor. Tente novamente.';
-const MENSAGEM_PADRAO = 'Não foi possível entrar. Tente novamente.';
+const MENSAGEM_SEM_CONEXAO = 'Não foi possível conectar ao servidor. Verifique se o sistema está no ar e tente novamente.';
+const MENSAGEM_PADRAO = 'Não foi possível concluir a operação. Tente novamente.';
 
 /**
- * Serviço de autenticação, ligado ao back (POST /api/v1/auth/login).
+ * Serviço de autenticação, ligado ao back (POST /api/v1/auth/login e /auth/register).
  *
  * Política do token (decisão registrada em docs/AUDITORIA-INTEGRACAO.md, pergunta P14):
  * JWT em sessionStorage. Some ao fechar a aba. Não usa localStorage.
@@ -55,8 +78,7 @@ export class AuthService {
   }
 
   /**
-   * Entra com CPF/CNPJ ou e-mail e senha. Erros chegam como Error com a mensagem para a tela
-   * (credenciais: "E-mail ou senha incorretos.", sem indicar o campo errado).
+   * Entra com CPF/CNPJ ou e-mail e senha. Erros chegam como ErroAutenticacao.
    * O perfil vem da role do servidor; o parâmetro só vale se a role não for reconhecida.
    */
   entrar(credenciais: Credenciais, perfil: Usuario['perfil'] = 'projetista'): Observable<Usuario> {
@@ -76,8 +98,26 @@ export class AuthService {
           this.salvarSessao(usuario, resposta.token);
           return usuario;
         }),
-        catchError((erro: HttpErrorResponse) => throwError(() => new Error(mensagemDoErro(erro)))),
+        catchError((erro: HttpErrorResponse) => throwError(() => erroDeResposta(erro, 'login'))),
       );
+  }
+
+  /**
+   * Cria a conta de projetista (POST /api/v1/auth/register) e já entra com as mesmas credenciais.
+   * Se a conta for criada mas o login falhar, o erro do login é propagado.
+   */
+  cadastrar(dados: DadosCadastro): Observable<Usuario> {
+    const corpo = {
+      name: dados.nome.trim(),
+      email: dados.email.trim(),
+      cpfCnpj: dados.cpfCnpj?.trim() || null,
+      password: dados.senha,
+      confirmPassword: dados.confirmacaoSenha,
+    };
+    return this.http.post(`${API_BASE}/auth/register`, corpo).pipe(
+      catchError((erro: HttpErrorResponse) => throwError(() => erroDeResposta(erro, 'cadastro'))),
+      switchMap(() => this.entrar({ documento: dados.email, senha: dados.senha })),
+    );
   }
 
   sair(): void {
@@ -89,6 +129,13 @@ export class AuthService {
     }
     this._token.set(null);
     this._usuario.set(null);
+  }
+
+  /** Atualiza nome e e-mail da sessão (e o token, se o back trocou) sem recarregar a página. */
+  atualizarSessao(parcial: Partial<Pick<Usuario, 'nome' | 'email'>>, novoToken?: string | null): void {
+    const atual = this._usuario();
+    if (!atual) return;
+    this.salvarSessao({ ...atual, ...parcial }, novoToken ?? this._token() ?? '');
   }
 
   private salvarSessao(usuario: Usuario, token: string): void {
@@ -126,9 +173,12 @@ function perfilDaRole(role: string | null | undefined): Usuario['perfil'] | null
   return null;
 }
 
-function mensagemDoErro(erro: HttpErrorResponse): string {
-  if (erro.status === 0) return MENSAGEM_SEM_CONEXAO;
-  if (erro.status === 401) return MENSAGEM_CREDENCIAIS;
-  const mensagem = (erro.error as { message?: string } | null)?.message;
-  return mensagem || MENSAGEM_PADRAO;
+/** Converte a resposta de erro do back (ErrorResponse: message e errors por campo) em ErroAutenticacao. */
+function erroDeResposta(erro: HttpErrorResponse, contexto: 'login' | 'cadastro'): ErroAutenticacao {
+  if (erro.status === 0) return new ErroAutenticacao(MENSAGEM_SEM_CONEXAO, 0);
+  const corpo = (erro.error ?? {}) as { message?: string; errors?: Record<string, string> };
+  if (erro.status === 401) return new ErroAutenticacao(MENSAGEM_CREDENCIAIS, 401);
+  const campos = corpo.errors ?? {};
+  const mensagem = corpo.message || (contexto === 'cadastro' ? 'Não foi possível criar a conta.' : MENSAGEM_PADRAO);
+  return new ErroAutenticacao(mensagem, erro.status, campos);
 }

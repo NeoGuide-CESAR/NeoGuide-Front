@@ -561,3 +561,63 @@ Back iniciado com `SERVER_PORT=8081 ./mvnw spring-boot:run` (JDK 21, banco `neog
 ### 9.3 Ponta a ponta
 
 Preenchido ao final da Fase 2.
+
+## 10. Cálculo integrado ao back (fluxo "Revisão concluída")
+
+Status: **back concluído e testado; front ainda não integrado** (ver 10.5).
+
+### 10.1 Diagnóstico (confirmado no código)
+
+- "Os dados ficam salvos neste navegador": `shared/wizard/etapas-calculo.component.html` (aviso da etapa de cargas).
+- "Revisão concluída. Seu rascunho está pronto. O cálculo de demanda ficará disponível...": `shared/wizard/wizard-body.component.html`.
+- "Revisão concluída.": `features/calculo-demanda/calculo-demanda.page.ts` (método `concluir()`), que só altera uma mensagem; não chama nenhum serviço.
+- Armazenamento local de dados de projeto: `core/projetos/rascunhos-projeto.service.ts` (`localStorage` com o rascunho completo e os complementos por projeto).
+- Serviço de cálculo "stub": não existe no front. O botão de conclusão não chama o back, então nenhuma mensagem de sucesso depende de resposta real.
+- Endpoints no back antes desta entrega: `PUT etapa-residencial`, `etapa-area-comum`, `etapa-comercial`, `etapa-cargas-especiais` e `POST /api/v1/simulacao/pre-calculo-etapa` existiam. **Faltavam** `GET validacao-normativa`, `POST calcular` (respondia 404), `GET resultado` e `GET memorial-pdf`.
+
+### 10.2 Implementado no back
+
+- `engine/DemandaFinalEngine` (motor puro): Ded, DQDG (= Ded − Dmbi), enquadramento BT/MT (residencial ≤ 300 kVA; comercial e misto ≤ 225 kVA), entrada de serviço pela Tabela 2 (380/220 V), barramento pela Tabela 3, Ip e alertas (INFO ≤ 50 kVA, ALERTA de Ip acima do disjuntor, INFO de relé ajustável a partir de 250 A, ALERTA de atendimento em MT).
+- `service/CalculoDemandaService`: consolida as etapas gravadas (tipologias, área comum, espaços comerciais, VE e motobomba), valida completude, calcula, grava o último resultado (`demand_results`) e serve resultado e memorial.
+- `controller/CalculoController`: `GET /validacao-normativa`, `POST /calcular`, `GET /resultado`, `GET /memorial-pdf` (em `/api/v1/projects/{id}/...` e `/projects/{id}/...`).
+- `service/MemorialPdfWriter`: PDF gerado sem dependência nova (Helvetica, A4, paginado).
+- Testes novos: `DemandaFinalEngineTest` (15), `CalculoControllerTest` (6, integração), `MemorialPdfWriterTest` (4). **Suíte completa do back: 348/348 passando.**
+
+### 10.3 Decisões tomadas (a validar)
+
+- DESATUALIZADO é detectado por impressão digital (SHA-256) dos insumos do cálculo, e não por data de alteração. Um PUT com os mesmos dados mantém CALCULADO.
+- Só o último cálculo é guardado por projeto (histórico descartado).
+- Selo de conformidade: `ATENDIMENTO_MT` (Ded acima do limite), `COM_ALERTAS` (há ALERTA) ou `CONFORME`.
+- Erros dos endpoints novos em RFC 7807 (`ProblemDetail`), com `regra`, `erros` (campo e etapa) e `detail`. Os PUTs existentes mantêm o formato atual de erro (mudar isso é mudança de contrato e depende de aprovação).
+- Endpoints novos respondem 404 quando o projeto é de outro usuário, como pede a especificação. Os endpoints antigos respondem 403 (B-SEC-02). A inconsistência precisa de decisão.
+- Neutro: a Tabela 2 da semente traz uma seção por faixa; o condutor de neutro usa a mesma seção. Confirmar com a norma.
+- Dc usa a demanda gravada em cada espaço comercial (calculada pelo mesmo motor no PUT).
+- Não implementado (sem campo no modelo): regra do Grupo A → MT e alerta de medidor exclusivo da motobomba.
+- Memorial: o layout final depende do modelo de memorial, que não está no repositório. Hoje o PDF traz o conteúdo do cálculo em texto simples.
+
+### 10.4 Respostas do usuário (contrato escolhido)
+
+- Área comum: o front passa a usar o catálogo do back (potência, fator de potência e fator de demanda vêm do catálogo).
+- Cargas especiais: o front pede potência por ponto de VE (kW) e uma bomba de incêndio em cv, que é o contrato atual do back.
+
+### 10.5 Pendências do front (ordem sugerida)
+
+1. Área comum por catálogo: nova tela e mapeamento para `CommonAreaLoadItemRequest`. Enquanto não for feita, o cálculo fica sem Ds e não deve ser exibido como resultado.
+2. Cargas especiais: trocar "quantidade de bombas" por uma bomba em cv e incluir potência por ponto de VE (kW); enviar em `PUT etapa-cargas-especiais`.
+3. Residencial: enviar `PUT etapa-residencial` (grupos viram tipologias) e carregar ao abrir o projeto. Falta um `GET` de etapas no back para isso.
+4. Autosave com estado "Salvando... / Rascunho salvo automaticamente / Não foi possível salvar" e cancelamento de requisições antigas.
+5. Remover `rascunhos-projeto.service.ts` como armazenamento de dados de projeto e incluir a migração ENVIAR/DESCARTAR.
+6. Revisão: `validacao-normativa` → `calcular` → `resultado` → `memorial-pdf` (blob), com banners de erro, de atenção e de falha de rede. Remover os textos antigos.
+7. Detalhamento: situação CALCULADO / DESATUALIZADO / NAO_CALCULADO com data real.
+
+Nada foi commitado nem enviado ao remoto.
+
+## 11. Atualização de premissa: etapa Comercial sempre disponível (substitui a D2)
+
+- **Antes (D2):** comercial só com tipo Comercial ou Misto; espaço comercial em edificação residencial era erro (B-VL-07, `COMERCIAL_TIPO_INCOMPATIVEL`).
+- **Agora:** a etapa Comercial é sempre disponível e opcional, para qualquer tipo. Não há erro de tipo.
+- **Enquadramento:** o tipo escolhido não muda; o back deriva o tipo de enquadramento. Residencial sem espaços comerciais: residencial (BT até 300 kVA). Residencial com espaços comerciais: misto (BT até 225 kVA, itens 6.2.4 e 6.2.6 da DIS-NOR-053). Misto e comercial: o próprio tipo (225 kVA).
+- **Aviso:** ALERTA `TIPO_ENQUADRAMENTO_MISTO` quando o derivado difere do escolhido; não bloqueia.
+- **Resultado e memorial:** informam o tipo escolhido, o tipo de enquadramento e o motivo.
+- **Estado das etapas:** calculado no servidor (`etapas[]` em `GET /projects/{id}`); `etapaAtual` passa a significar a etapa mais adiantada alcançada, registrada por `PUT /projects/{id}/etapa-atual`.
+- Detalhes, testes e pendências: `CORRECAO-COMERCIAL.md`.

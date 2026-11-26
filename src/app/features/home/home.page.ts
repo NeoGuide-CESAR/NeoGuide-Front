@@ -43,11 +43,15 @@ export class HomePage {
 
   readonly menuAberto = signal(false);
 
+  constructor() {
+    this.projetos.atualizarPainel();
+  }
+
   readonly links: LinkNav[] = [
     { rotulo: 'Início', rota: '/inicio' },
     { rotulo: 'Meus Projetos', rota: '/meus-projetos' },
     { rotulo: 'Cálculo de Demanda', href: '#', submenu: true },
-    { rotulo: 'Documentos', href: '#' },
+    { rotulo: 'Documentos', rota: '/normas' },
   ];
 
   readonly indicadores = computed(() => {
@@ -73,7 +77,7 @@ export class HomePage {
           : 'Você não tem cálculos em andamento.',
         ...(rascunho ? { rota: `/projetos/${rascunho.id}/calculo` } : { href: '#' }),
       },
-      { icone: 'menu_book', titulo: 'Norma DIS-NOR-053', texto: 'Consulte a versão vigente da norma da distribuidora.', href: '#' },
+      { icone: 'menu_book', titulo: 'Norma DIS-NOR-053', texto: 'Consulte as normas e tabelas usadas no cálculo.', rota: '/normas/dis-nor-053' },
       { icone: 'chat', titulo: 'Tirar dúvidas com o Neo', texto: 'Pergunte sobre a norma enquanto preenche.', href: '#' },
     ];
   });

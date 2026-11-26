@@ -1,0 +1,158 @@
+<app-site-header [links]="links"><a class="usuario" routerLink="/perfil"><span class="ms" aria-hidden="true">account_circle</span>{{ auth.usuario()?.nome || 'Meu perfil' }}<span class="ms" aria-hidden="true">expand_more</span></a></app-site-header>
+
+<main class="conteudo">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a routerLink="/meus-projetos">Meus Projetos</a>
+    <span class="ms" aria-hidden="true">chevron_right</span>
+    <span aria-current="page">{{ dados()?.nome || 'Projeto' }}</span>
+  </nav>
+
+  @switch (estado()) {
+    @case ('nao-encontrado') {
+      <div class="falha" role="alert">
+        <h1>Projeto não encontrado</h1>
+        <p>Este projeto não existe ou não pertence à sua conta.</p>
+        <a class="btn btn--primario" routerLink="/meus-projetos">Voltar para Meus Projetos</a>
+      </div>
+    }
+    @case ('erro') {
+      <div class="falha" role="alert">
+        <p>Não foi possível carregar este projeto.</p>
+        <button type="button" class="btn btn--primario" (click)="carregar()">Tentar novamente</button>
+      </div>
+    }
+    @case ('carregando') {
+      @if (esqueleto()) {
+        <div class="esqueleto" aria-busy="true" aria-label="Carregando o projeto">
+          <app-skeleton [altura]="44" class="esq-titulo" />
+          <div class="colunas">
+            <div class="coluna coluna--esq"><app-skeleton [altura]="260" /><app-skeleton [altura]="420" /></div>
+            <div class="coluna coluna--dir"><app-skeleton [altura]="180" /><app-skeleton [altura]="140" /></div>
+          </div>
+        </div>
+      }
+    }
+    @case ('ok') {
+      <header class="cabecalho">
+        <div>
+          <div class="titulo-linha">
+            <h1>{{ dados()?.nome }}</h1>
+            <app-status-badge [tipo]="selo()" />
+          </div>
+          <p class="atualizado">Atualizado em {{ atualizadoEm() }}</p>
+        </div>
+        <div class="acoes">
+          @if (regras().duplicar) {
+            <button type="button" class="btn btn--sm btn--contorno" [disabled]="duplicando()" (click)="duplicar()">
+              @if (duplicando()) { <span class="giro" aria-hidden="true"></span>Duplicando… } @else { <span class="ms" aria-hidden="true">content_copy</span>Duplicar }
+            </button>
+          }
+          @if (regras().editar) {
+            <button type="button" class="btn btn--sm btn--primario" (click)="editar()"><span class="ms" aria-hidden="true">edit</span>Editar</button>
+          }
+        </div>
+      </header>
+
+      @if (aviso(); as a) {
+        <app-alert-banner class="aviso" [variante]="a.variante" [icone]="a.icone">{{ a.texto }}</app-alert-banner>
+      }
+
+      <div class="colunas">
+        <div class="coluna coluna--esq">
+          <section class="cartao" aria-labelledby="t-dados">
+            <h2 id="t-dados">Dados do projeto</h2>
+            <app-key-value-list [itens]="linhasProjeto()" />
+          </section>
+
+          <section class="cartao" aria-labelledby="t-etapas">
+            <h2 id="t-etapas">Informações por etapa</h2>
+
+            <div class="secao">
+              <h3>2 · Residencial</h3>
+              @if (!aplicaResidencial()) {
+                <p class="nao-aplica">Não se aplica a este projeto</p>
+              } @else if (pendenteResidencial()) {
+                <p class="pendente"><span class="selo-pendente">Pendente</span>Etapa ainda não preenchida
+                  @if (regras().editar) { <button type="button" class="link" (click)="preencher(2)">Preencher</button> }</p>
+              } @else {
+                <div class="rolagem">
+                  <table>
+                    <caption class="sr-only">Grupos de unidades residenciais</caption>
+                    <thead><tr><th scope="col">Grupo</th><th scope="col">Unidades</th><th scope="col">Metragem de cada</th></tr></thead>
+                    <tbody>@for (g of grupos(); track g.grupo) { <tr><td>Grupo {{ g.grupo }}</td><td>{{ g.unidades }}</td><td>{{ g.area }}</td></tr> }</tbody>
+                  </table>
+                </div>
+                <p class="smart">Smart studio: <strong>{{ smartStudio() }}</strong></p>
+              }
+            </div>
+
+            <div class="secao">
+              <h3>3 · Área comum</h3>
+              @for (s of secoesAreaComum(); track s.titulo) {
+                <p class="linha-categoria">
+                  <span class="categoria">{{ s.titulo }}:</span>{{ ' ' }}
+                  @if (s.itens.length) {
+                    @for (i of s.itens; track $index) { <span class="item">{{ i.rotulo }}:</span>{{ ' ' }}<strong>{{ i.valor }}</strong>@if (!$last) { <span class="sep"> · </span> } }
+                  } @else { <strong>Nenhum valor informado</strong> }
+                </p>
+              }
+            </div>
+
+            <div class="secao">
+              <h3>4 · Comercial</h3>
+              @for (e of espacos(); track $index) {
+                <p class="linha">{{ e.rotulo }} · <strong>{{ e.area }}</strong>@if (e.carga) { · {{ e.carga }} }</p>
+              } @empty { <p class="nao-aplica">Nenhum espaço comercial informado</p> }
+            </div>
+
+            <div class="secao">
+              <h3>5 · Veículo elétrico e bomba de incêndio</h3>
+              @if (pendenteEspeciais()) {
+                <p class="pendente"><span class="selo-pendente">Pendente</span>Etapa ainda não preenchida
+                  @if (regras().editar) { <button type="button" class="link" (click)="preencher(5)">Preencher</button> }</p>
+              }
+              @for (l of linhasEspeciais(); track l.rotulo) {
+                <p class="linha">{{ l.rotulo }}: @if (l.muted) { <span class="nao-aplica">não se aplica a este projeto</span> } @else { <strong>{{ l.valor }}</strong> }</p>
+              }
+            </div>
+          </section>
+
+          <div class="voltar"><button type="button" class="btn btn--sm btn--contorno" (click)="voltar()"><span class="ms" aria-hidden="true">arrow_back</span>Voltar</button></div>
+        </div>
+
+        <div class="coluna coluna--dir">
+          <section class="cartao cartao--demanda" aria-labelledby="t-demanda">
+            <h2 id="t-demanda" class="rotulo-demanda">Demanda total
+              @if (situacaoCalculo() === 'DESATUALIZADO') { <app-status-badge tipo="desatualizado" /> }
+            </h2>
+            @if (situacaoCalculo() === 'NAO_CALCULADO') {
+              <p class="sem-calculo">Ainda não calculado</p>
+              @if (regras().editar) {
+                <a class="btn btn--sm btn--primario" [routerLink]="['/projetos', id(), 'revisao']"><span class="ms" aria-hidden="true">bolt</span>Calcular demanda</a>
+              }
+            } @else {
+              <p class="valor"><span class="num">{{ dedNumero() }}</span> <span class="un">kVA</span></p>
+              <p class="detalhe">Calculado em {{ dataDoCalculo() }} conforme a DIS-NOR-053</p>
+              <p class="detalhe" [class.detalhe--mt]="mt()">Fornecimento: {{ fornecimento() }}</p>
+              @if (situacaoCalculo() === 'DESATUALIZADO') {
+                <p class="detalhe">Os dados mudaram depois deste cálculo.</p>
+                @if (regras().editar) {
+                  <a class="btn btn--sm btn--primario recalcular" [routerLink]="['/projetos', id(), 'revisao']">Recalcular</a>
+                }
+              }
+              <a class="ver-resultado" [routerLink]="['/projetos', id(), 'resultado']">Ver resultado completo <span class="ms" aria-hidden="true">arrow_forward</span></a>
+            }
+          </section>
+
+          <section class="cartao" aria-labelledby="t-andamento">
+            <h2 id="t-andamento">Andamento</h2>
+            <app-key-value-list [itens]="andamento()" />
+          </section>
+        </div>
+      </div>
+    }
+  }
+</main>
+
+<app-snackbar />
+<app-site-footer />

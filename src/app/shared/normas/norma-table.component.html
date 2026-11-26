@@ -1,0 +1,49 @@
+<app-norma-section-card [id]="tabela().ancora" [titulo]="tabela().titulo" [referencia]="referencia()" [destacada]="destacada()">
+  <div class="etiquetas">
+    @for (etapa of tabela().etapasWizard; track etapa) { <span class="etiqueta">Usada na etapa {{ etapa }} do wizard</span> }
+    @if (tabela().usadaNoResultado) { <span class="etiqueta">Usada no resultado do cálculo</span> }
+  </div>
+
+  @if (!tabela().disponivel) {
+    <p class="indisponivel"><span class="ms" aria-hidden="true">info</span>Esta tabela ainda não está no catálogo do NeoGuide. Consulte o documento oficial.</p>
+  } @else if (estado() === 'erro') {
+    <div class="erro" role="alert">
+      <p>Não foi possível carregar esta tabela.</p>
+      <button type="button" class="botao botao--contorno" (click)="carregar()">Tentar novamente</button>
+    </div>
+  } @else if (estado() === 'carregando') {
+    <div class="esqueleto" aria-busy="true" aria-label="Carregando a tabela"></div>
+  } @else {
+    <div class="acoes">
+      <div class="filtro">
+        <label [for]="tabela().ancora + '-filtro'" class="sr-only">Filtrar linhas da tabela</label>
+        <span class="ms" aria-hidden="true">search</span>
+        <input [id]="tabela().ancora + '-filtro'" type="search" placeholder="Filtrar linhas (ex.: 68)" [value]="filtro()" (input)="filtro.set($any($event.target).value)">
+      </div>
+      <button type="button" class="botao botao--contorno" (click)="copiar()"><span class="ms" aria-hidden="true">content_copy</span>Copiar</button>
+      <button type="button" class="botao botao--contorno" (click)="perguntarAoNeo()"><span class="ms" aria-hidden="true">chat</span>Perguntar ao Neo sobre esta tabela</button>
+    </div>
+
+    <div class="rolagem" tabindex="0" role="region" [attr.aria-label]="'Tabela: ' + tabela().titulo">
+      <table>
+        <caption class="sr-only">{{ tabela().titulo }}</caption>
+        <thead><tr>@for (c of colunas(); track c.titulo) { <th scope="col" [class.dir]="c.direita">{{ c.titulo }}</th> }</tr></thead>
+        <tbody>
+          @for (l of visiveis(); track $index) {
+            <tr [class.achado]="filtrando()">@for (c of colunas(); track c.titulo) { <td [class.dir]="c.direita">{{ valorDe(l, c) }}</td> }</tr>
+          } @empty {
+            <tr><td [attr.colspan]="colunas().length" class="vazio">Nenhuma linha para "{{ filtro() }}".</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (temMais()) {
+      <button type="button" class="botao botao--link" (click)="expandida.set(!expandida())">
+        {{ expandida() ? 'Ver menos' : 'Ver tabela completa (' + linhas().length + ' linhas)' }}
+      </button>
+    }
+    @if (rodape(); as r) { <p class="rodape">{{ r }}</p> }
+    @for (nota of tabela().notasResumidas; track nota) { <p class="nota"><span class="ms" aria-hidden="true">info</span>{{ nota }}</p> }
+  }
+</app-norma-section-card>

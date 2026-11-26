@@ -5,6 +5,8 @@ export interface Projeto {
   nome: string;
   atualizadoEm: string; // ISO 8601
   status: StatusProjeto;
+  /** Situação como o back informa (ex.: "Aguardando correção"); aparece no lugar do rótulo do grupo. */
+  rotuloStatus?: string;
   etapaAtual?: number;
   totalEtapas?: number;
   tipoEdificacao?: string;

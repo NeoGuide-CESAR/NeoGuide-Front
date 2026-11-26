@@ -1,0 +1,157 @@
+<app-site-header [links]="links"><a class="usuario" routerLink="/perfil"><span class="ms" aria-hidden="true">account_circle</span>{{ auth.usuario()?.nome || 'Meu perfil' }}<span class="ms" aria-hidden="true">expand_more</span></a></app-site-header>
+
+<main class="conteudo">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a routerLink="/inicio">Início</a>
+    <span class="ms" aria-hidden="true">chevron_right</span>
+    <span aria-current="page">Normas técnicas</span>
+  </nav>
+
+  <header class="cabecalho">
+    <h1>Normas técnicas</h1>
+    <p class="subtitulo">As regras e tabelas da Neoenergia que o NeoGuide usa para calcular a demanda.</p>
+  </header>
+
+  @if (estado() === 'erro') {
+    <div class="falha" role="alert">
+      <p>Não foi possível carregar as normas.</p>
+      <button type="button" class="btn btn--primario" (click)="tentarNovamente()">Tentar novamente</button>
+    </div>
+  } @else if (estado() === 'carregando') {
+    <div aria-busy="true" aria-label="Carregando as normas">
+      <div class="seletor"><app-skeleton [altura]="110" /><app-skeleton [altura]="110" /></div>
+      <div class="corpo">
+        <div class="lateral"><app-skeleton [altura]="320" /></div>
+        <div class="secoes"><app-skeleton [altura]="140" /><app-skeleton [altura]="220" /><app-skeleton [altura]="220" /></div>
+      </div>
+    </div>
+  } @else {
+    <div class="seletor" role="group" aria-label="Escolha a norma">
+      @for (n of normasOrdenadas(); track n.codigo) {
+        <button type="button" class="norma" [class.norma--ativa]="n.codigo.toLowerCase() === cod()" [attr.aria-pressed]="n.codigo.toLowerCase() === cod()" (click)="escolherNorma(n.codigo)">
+          <span class="ms norma__icone" aria-hidden="true">menu_book</span>
+          <span class="norma__texto">
+            <span class="norma__codigo">{{ n.codigo }} · Rev. {{ n.revisao }} <span class="selo">{{ n.papel === 'PRINCIPAL' ? 'Principal' : 'Complementar' }}</span></span>
+            <span class="norma__descricao">{{ n.resumo }}</span>
+            <span class="norma__data">{{ n.dataAprovacao ? 'Aprovada em ' + soData(n.dataAprovacao) : 'Data de aprovação: ver documento oficial' }}</span>
+          </span>
+        </button>
+      }
+    </div>
+
+    <button type="button" class="abrir-indice" (click)="indiceAberto.set(true)"><span class="ms" aria-hidden="true">toc</span>Nesta página</button>
+
+    <div class="corpo">
+      <aside class="lateral" [class.lateral--aberta]="indiceAberto()">
+        <div class="folha-fundo" (click)="indiceAberto.set(false)" aria-hidden="true"></div>
+        <nav class="indice" aria-label="Índice da norma">
+          <button type="button" class="fechar-indice" aria-label="Fechar o índice" (click)="indiceAberto.set(false)"><span class="ms" aria-hidden="true">close</span></button>
+          @for (g of indice(); track g.titulo) {
+            <p class="indice__grupo">{{ g.titulo }}</p>
+            <ul>
+              @for (s of g.itens; track s.id) {
+                <li><a [href]="'#' + s.id" [class.ativo]="ativo() === s.id" [attr.aria-current]="ativo() === s.id ? 'location' : null" (click)="irPara(s.id, $event)">{{ s.rotulo }}</a></li>
+              }
+            </ul>
+          } @empty { <p class="indice__vazio">Nenhuma seção.</p> }
+        </nav>
+      </aside>
+
+      <div class="secoes">
+        <div class="busca">
+          <label for="busca-normas" class="sr-only">Buscar tabela, item ou termo</label>
+          <span class="ms" aria-hidden="true">search</span>
+          <input id="busca-normas" type="search" placeholder="Buscar tabela, item ou termo" autocomplete="off" [value]="busca()" (input)="aoDigitar($any($event.target).value)">
+        </div>
+
+        @if (semResultado()) {
+          <div class="sem-resultado" role="status">
+            <p>Nenhum resultado para "{{ busca() }}".</p>
+            <button type="button" class="btn btn--contorno" (click)="limparBusca()">Limpar busca</button>
+          </div>
+        }
+
+        @if (mostra('visao-geral')) {
+          <app-norma-section-card id="visao-geral" [titulo]="visao().titulo" [referencia]="norma() ? norma()!.titulo : null" [destacada]="destacada() === 'visao-geral'">
+            @for (p of visao().paragrafos; track $index) { <p class="texto">{{ p }}</p> }
+            <div class="documento">
+              @if (norma()?.urlDocumento; as url) {
+                <a class="btn btn--contorno" [href]="url" target="_blank" rel="noopener"><span class="ms" aria-hidden="true">open_in_new</span>Abrir documento oficial</a>
+              }
+              <p class="documento__info">
+                <strong>Revisão {{ norma()?.revisao }}</strong> · {{ aprovacao() ? 'aprovada em ' + aprovacao() : 'data de aprovação: ver documento oficial' }}.
+                @if (!norma()?.urlDocumento) { Documento oficial: consulte o site da Neoenergia Pernambuco. }
+                Verifique no site da Neoenergia se há revisão mais recente.
+              </p>
+            </div>
+            <app-alert-banner variante="info" class="aviso-fixo">{{ aviso }}</app-alert-banner>
+          </app-norma-section-card>
+        }
+
+        @if (mostra('formula-geral')) {
+          <app-norma-section-card id="formula-geral" titulo="Como o NeoGuide calcula" referencia="Fórmula geral" [destacada]="destacada() === 'formula-geral'">
+            @for (f of formulaGeral.formulas; track f) { <pre class="formula">{{ f }}</pre> }
+            <p class="texto">{{ formulaGeral.nota }}</p>
+            <ul class="parcelas">
+              @for (p of formulaGeral.parcelas; track p.sigla) {
+                <li><strong>{{ p.sigla }}</strong>: {{ p.texto }}. <span class="muted">{{ p.norma }}. Etapa {{ p.etapa }} do wizard.</span></li>
+              }
+            </ul>
+          </app-norma-section-card>
+        }
+
+        @if (cod() === 'dis-nor-053') {
+          @for (r of regras053; track r.id) {
+            @if (mostra(r.id)) { <app-regra-card [regra]="r" [destacada]="destacada() === r.id" /> }
+          }
+        } @else if (mostra(parcelas030.id)) {
+          <app-norma-section-card [id]="parcelas030.id" [titulo]="parcelas030.titulo" [referencia]="parcelas030.referencia" [destacada]="destacada() === parcelas030.id">
+            <p class="texto">{{ parcelas030.introducao }}</p>
+            <ul class="parcelas">
+              @for (p of parcelas030.parcelas; track p.letra) {
+                <li><strong>{{ p.letra }}</strong> · {{ p.descricao }} · {{ p.tabela }} · FP {{ p.fatorPotencia }}</li>
+              }
+            </ul>
+          </app-norma-section-card>
+        }
+
+        @for (t of tabelas(); track t.ancora) {
+          @if (mostra(t.ancora)) { <app-norma-table [tabela]="t" [destacada]="destacada() === t.ancora" /> }
+        }
+
+        @if (mostra('premissas')) {
+          <app-norma-section-card id="premissas" titulo="Premissas adotadas pelo NeoGuide" referencia="Lista única, igual à do memorial" [destacada]="destacada() === 'premissas'">
+            <p class="texto">Pontos em que a norma deixa margem de interpretação ou não define um valor. O NeoGuide adota as escolhas abaixo; elas aparecem também no memorial.</p>
+            <ul class="premissas">
+              @for (p of premissas(); track p.codigo) {
+                <li><app-premissa-badge /><span class="premissa__texto">{{ p.texto }}</span><span class="premissa__ref">{{ p.referencia }}</span></li>
+              }
+            </ul>
+          </app-norma-section-card>
+        }
+
+        @if (mostra('glossario')) {
+          <app-norma-section-card id="glossario" titulo="Glossário" referencia="Termos usados na página e no cálculo" [destacada]="destacada() === 'glossario'">
+            <dl class="glossario">
+              @for (g of glossario; track g.id) {
+                <div class="termo"><dt [id]="'glossario-' + g.id" tabindex="-1">{{ g.termo }}</dt><dd>{{ g.definicao }}</dd></div>
+              }
+            </dl>
+          </app-norma-section-card>
+        }
+
+        @if (mostra('complementares')) {
+          <app-norma-section-card id="complementares" titulo="Normas complementares" referencia="Apenas referência" [destacada]="destacada() === 'complementares'">
+            <p class="texto">{{ complementares.introducao }}</p>
+            <ul class="parcelas">
+              @for (i of complementares.itens; track i.codigo) { <li><strong>{{ i.codigo }}</strong> · {{ i.texto }}</li> }
+            </ul>
+          </app-norma-section-card>
+        }
+      </div>
+    </div>
+  }
+</main>
+
+<app-snackbar />
+<app-site-footer />
