@@ -1,0 +1,53 @@
+server {
+    listen 80;
+    server_name _;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Compressão Gzip para assets estáticos
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml text/javascript image/svg+xml;
+    gzip_min_length 1024;
+
+    # Proxy reverso para o NeoGuide-Back (Spring Boot na porta 8080)
+    location /api/v1/ {
+        proxy_pass http://host.docker.internal:8080/api/v1/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        # Remove Origin para manter chamada mesma-origem sem conflito de CORS no backend
+        proxy_set_header Origin "";
+        proxy_read_timeout 60s;
+    }
+
+    # Proxy reverso para o NeoGuide-NeoChat / Lumi (FastAPI na porta 8000)
+    # Reescreve /api/neo/... -> /api/v1/... e injeta a chave X-API-Key no servidor
+    location /api/neo/ {
+        proxy_pass http://host.docker.internal:8000/api/v1/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-API-Key "${LUMI_API_KEY}";
+        # Suporte a streaming SSE e respostas mais longas da LLM
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 120s;
+    }
+
+    # Cache longo para bundles com hash gerados pelo Angular
+    location ~* \.(?:js|css|woff2?|ttf|eot|svg|png|jpg|jpeg|gif|ico|webp)$ {
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
+
+    # Roteamento SPA Angular (fallback para index.html)
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}

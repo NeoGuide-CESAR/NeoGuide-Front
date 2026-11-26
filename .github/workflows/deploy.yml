@@ -1,0 +1,71 @@
+name: Deploy Front to VPS
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch: # Permite disparar o deploy manualmente pela aba Actions do GitHub
+
+jobs:
+  test:
+    name: Build & Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Angular (Production)
+        run: npm run build
+
+      - name: Run Unit Tests
+        run: npx ng test --watch=false --browsers=ChromeHeadless
+
+  deploy:
+    name: Deploy to VPS
+    needs: test
+    # Executa o deploy na VPS SOMENTE quando for push na main (ex: pós-merge), nunca durante o PR
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            set -e
+
+            # Localiza o diretório do projeto na VPS
+            if [ -d "$HOME/neoguide-front" ]; then
+              cd "$HOME/neoguide-front"
+            elif [ -d "$HOME/NeoGuide-Front" ]; then
+              cd "$HOME/NeoGuide-Front"
+            else
+              echo "Erro: Diretório do NeoGuide-Front não encontrado na home do usuário!"
+              exit 1
+            fi
+
+            echo "=== Atualizando repositório na VPS ==="
+            git fetch origin main
+            git reset --hard origin/main
+
+            echo "=== Subindo container do Frontend com Docker Compose ==="
+            docker compose down
+            docker compose up -d --build --remove-orphans
+
+            echo "=== Limpando imagens antigas sem uso ==="
+            docker image prune -f
+
+            echo "=== Deploy do Frontend finalizado com sucesso! ==="
