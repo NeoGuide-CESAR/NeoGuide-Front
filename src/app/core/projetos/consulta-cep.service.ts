@@ -1,22 +1,36 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable, InjectionToken, inject, isDevMode } from '@angular/core';
-import { Observable, map, throwError } from 'rxjs';
-import { ConfigService } from '../../config/service/config.service';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Injectable, InjectionToken, inject } from '@angular/core';
+import { Observable, catchError, map, of, throwError } from 'rxjs';
+import { API_BASE } from '../api/api.config';
 
 export interface ResultadoCep { endereco: string; bairro: string; municipio: string; uf: string; naoEncontrado?: boolean; foraConcessao?: boolean; }
-/** TODO NEO-11: configurar rota e adaptar resposta quando o contrato de CEP do back estiver disponível. */
+
+/** Resposta do back em GET /api/v1/cep/{cep} (o back consulta o ViaCEP e informa a área de concessão). */
+interface CepApi { cep?: string; logradouro?: string; bairro?: string; cidade?: string; uf?: string; atendidoNeoenergia?: boolean; }
+
+/** Permite trocar a rota (testes ou outro ambiente). Sem valor, usa a rota do back. */
 export const ROTA_CEP = new InjectionToken<((cep: string) => string) | null>('ROTA_CEP', { providedIn: 'root', factory: () => null });
+
 @Injectable({ providedIn: 'root' })
 export class ConsultaCepService {
   private readonly http = inject(HttpClient);
-  private readonly config = inject(ConfigService);
   private readonly rota = inject(ROTA_CEP);
+
   consultar(cep: string): Observable<ResultadoCep> {
-    if (this.rota) return this.http.get<ResultadoCep>(this.config.getApiUrl(this.rota(cep)), { withCredentials: true });
-    if (!isDevMode()) return throwError(() => new Error('Rota de CEP não configurada.'));
-    // ViaCEP é fallback apenas de desenvolvimento e não determina concessão.
-    return this.http.get<{ logradouro?: string; bairro?: string; localidade?: string; uf?: string; erro?: boolean | string }>(`https://viacep.com.br/ws/${cep}/json/`).pipe(
-      map(r => ({ endereco: r.logradouro ?? '', bairro: r.bairro ?? '', municipio: r.localidade ?? '', uf: r.uf ?? '', naoEncontrado: !!r.erro })),
+    const url = this.rota ? this.rota(cep) : `${API_BASE}/cep/${cep}`;
+    return this.http.get<CepApi>(url).pipe(
+      map((r): ResultadoCep => ({
+        endereco: r.logradouro ?? '',
+        bairro: r.bairro ?? '',
+        municipio: r.cidade ?? '',
+        uf: r.uf ?? '',
+        // O back só informa "atendido"; ausente (resposta antiga) não bloqueia o preenchimento.
+        foraConcessao: r.atendidoNeoenergia === false,
+      })),
+      // CEP inexistente (404) é um resultado; qualquer outra falha segue como erro (o formulário mostra "falha").
+      catchError((e: HttpErrorResponse) => e.status === 404
+        ? of({ endereco: '', bairro: '', municipio: '', uf: '', naoEncontrado: true })
+        : throwError(() => e)),
     );
   }
 }
